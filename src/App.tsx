@@ -8,6 +8,8 @@ import ProfilePage from './pages/ProfilePage'
 import SettingsPage from './pages/SettingsPage'
 import LearningPathDetailPage from './pages/LearningPathDetailPage'
 import LearningPathFormPage from './pages/LearningPathFormPage'
+import UnitDetailPage from './pages/UnitDetailPage'
+import LessonDetailPage from './pages/LessonDetailPage'
 import NotFoundPage from './pages/NotFoundPage'
 
 function App() {
@@ -24,6 +26,8 @@ function App() {
           <Route path="/learning-paths/new" element={<LearningPathFormPage />} />
           <Route path="/learning-paths/:id" element={<LearningPathDetailPage />} />
           <Route path="/learning-paths/:id/edit" element={<LearningPathFormPage />} />
+          <Route path="/units/:unitId" element={<UnitDetailPage />} />
+          <Route path="/lessons/:lessonId" element={<LessonDetailPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Routes>

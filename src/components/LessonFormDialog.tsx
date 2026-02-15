@@ -5,19 +5,19 @@ import DialogContent from '@mui/material/DialogContent'
 import DialogActions from '@mui/material/DialogActions'
 import TextField from '@mui/material/TextField'
 import Button from '@mui/material/Button'
-import { createSection, updateSection } from '../api'
-import type { Section } from '../types/api'
+import { createLesson, updateLesson } from '../api'
+import type { Lesson } from '../types/api'
 
-interface SectionFormDialogProps {
+interface LessonFormDialogProps {
   open: boolean
   onClose: () => void
-  onSave: (section: Section) => void
-  learningPathId: string
-  section?: Section
+  onSave: (lesson: Lesson) => void
+  unitId: string
+  lesson?: Lesson
   nextOrder: number
 }
 
-export default function SectionFormDialog({ open, onClose, onSave, learningPathId, section, nextOrder }: SectionFormDialogProps) {
+export default function LessonFormDialog({ open, onClose, onSave, unitId, lesson, nextOrder }: LessonFormDialogProps) {
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [order, setOrder] = useState(nextOrder)
@@ -25,23 +25,23 @@ export default function SectionFormDialog({ open, onClose, onSave, learningPathI
 
   useEffect(() => {
     if (open) {
-      setName(section?.name ?? '')
-      setDescription(section?.description ?? '')
-      setOrder(section?.order ?? nextOrder)
+      setName(lesson?.name ?? '')
+      setDescription(lesson?.description ?? '')
+      setOrder(lesson?.order ?? nextOrder)
     }
-  }, [open, section, nextOrder])
+  }, [open, lesson, nextOrder])
 
   const handleSubmit = async () => {
     if (!name.trim()) return
     setSaving(true)
     try {
-      let result: Section
-      if (section) {
-        const data = await updateSection(section.id, { name: name.trim(), description: description.trim() || undefined, order })
-        result = data.section
+      let result: Lesson
+      if (lesson) {
+        const data = await updateLesson(lesson.id, { name: name.trim(), description: description.trim() || undefined, order })
+        result = data.lesson
       } else {
-        const data = await createSection({ name: name.trim(), description: description.trim() || undefined, order, learningPathId })
-        result = data.section
+        const data = await createLesson({ name: name.trim(), description: description.trim() || undefined, order, unitId })
+        result = data.lesson
       }
       onSave(result)
       onClose()
@@ -54,7 +54,7 @@ export default function SectionFormDialog({ open, onClose, onSave, learningPathI
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-      <DialogTitle>{section ? 'Edytuj sekcję' : 'Nowa sekcja'}</DialogTitle>
+      <DialogTitle>{lesson ? 'Edytuj lekcję' : 'Nowa lekcja'}</DialogTitle>
       <DialogContent>
         <TextField
           autoFocus

@@ -77,3 +77,99 @@ export interface UpdateUnit {
   description?: string
   order?: number
 }
+
+// Lessons
+export interface Lesson {
+  id: string
+  unitId: string
+  name: string
+  description: string | null
+  order: number
+  createdAt: string
+  updatedAt: string | null
+}
+
+export interface CreateLesson {
+  name: string
+  description?: string
+  order: number
+  unitId: string
+}
+
+export interface UpdateLesson {
+  name?: string
+  description?: string
+  order?: number
+}
+
+// Activities
+export type ActivityType = 'article' | 'exercise' | 'quiz'
+export type ExerciseDifficulty = 'easy' | 'medium' | 'hard'
+
+export interface Activity {
+  id: string
+  lessonId: string
+  name: string
+  description: string | null
+  order: number
+  type: ActivityType
+  createdAt: string
+  updatedAt: string | null
+}
+
+export interface Article extends Activity {
+  type: 'article'
+  ref: string
+}
+
+export interface Exercise extends Activity {
+  type: 'exercise'
+  difficulty: ExerciseDifficulty
+}
+
+export interface Quiz extends Activity {
+  type: 'quiz'
+}
+
+export interface CreateArticle {
+  name: string
+  description?: string
+  order: number
+  lessonId: string
+  ref: string
+}
+
+export interface UpdateArticle {
+  name?: string
+  description?: string
+  order?: number
+  ref?: string
+}
+
+export interface CreateExercise {
+  name: string
+  description?: string
+  order: number
+  lessonId: string
+  difficulty: ExerciseDifficulty
+}
+
+export interface UpdateExercise {
+  name?: string
+  description?: string
+  order?: number
+  difficulty?: ExerciseDifficulty
+}
+
+export interface CreateQuiz {
+  name: string
+  description?: string
+  order: number
+  lessonId: string
+}
+
+export interface UpdateQuiz {
+  name?: string
+  description?: string
+  order?: number
+}

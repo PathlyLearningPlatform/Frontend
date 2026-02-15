@@ -3,7 +3,7 @@ import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import Button from '@mui/material/Button'
 import IconButton from '@mui/material/IconButton'
-import CircularProgress from '@mui/material/CircularProgress'
+import { PathDetailSkeleton } from '../components/PageSkeleton'
 import Alert from '@mui/material/Alert'
 import Breadcrumbs from '@mui/material/Breadcrumbs'
 import Link from '@mui/material/Link'
@@ -26,15 +26,19 @@ import {
   deleteSection,
   getUnits,
   deleteUnit,
+  updateUnit,
 } from '../api'
 import type { LearningPath, Section, Unit } from '../types/api'
 import ConfirmDialog from '../components/ConfirmDialog'
 import SectionFormDialog from '../components/SectionFormDialog'
 import UnitFormDialog from '../components/UnitFormDialog'
+import SortableList from '../components/SortableList'
+import { useSnackbar } from '../context/SnackbarContext'
 
 export default function LearningPathDetailPage() {
   const { id } = useParams()
   const navigate = useNavigate()
+  const { showSnackbar } = useSnackbar()
 
   const [path, setPath] = useState<LearningPath | null>(null)
   const [sections, setSections] = useState<Section[]>([])
@@ -118,34 +122,87 @@ export default function LearningPathDetailPage() {
 
   const handleDeleteSection = async () => {
     if (!deleteSectionId) return
+    // Optimistic: remove from UI immediately
+    const removedId = deleteSectionId
+    setSections((prev) => prev.filter((s) => s.id !== removedId))
+    setUnitsBySection((prev) => {
+      const next = { ...prev }
+      delete next[removedId]
+      return next
+    })
+    setDeleteSectionId(null)
     try {
-      await deleteSection(deleteSectionId)
-      fetchData()
+      await deleteSection(removedId)
+      showSnackbar('Sekcja usunięta')
     } catch {
       setError('Nie udało się usunąć sekcji.')
+      fetchData() // rollback on error
     }
-    setDeleteSectionId(null)
   }
 
   const handleDeleteUnit = async () => {
     if (!deleteUnitId) return
+    const removedId = deleteUnitId
+    setUnitsBySection((prev) => {
+      const next: Record<string, Unit[]> = {}
+      for (const [sectionId, units] of Object.entries(prev)) {
+        next[sectionId] = units.filter((u) => u.id !== removedId)
+      }
+      return next
+    })
+    setDeleteUnitId(null)
     try {
-      await deleteUnit(deleteUnitId)
-      fetchData()
+      await deleteUnit(removedId)
+      showSnackbar('Unit usunięty')
     } catch {
       setError('Nie udało się usunąć unita.')
+      fetchData()
     }
-    setDeleteUnitId(null)
+  }
+
+  const handleSectionSave = (section: Section) => {
+    if (editingSection) {
+      setSections((prev) =>
+        prev.map((s) => (s.id === section.id ? section : s)).sort((a, b) => a.order - b.order)
+      )
+      showSnackbar('Sekcja zaktualizowana')
+    } else {
+      setSections((prev) => [...prev, section].sort((a, b) => a.order - b.order))
+      setUnitsBySection((prev) => ({ ...prev, [section.id]: [] }))
+      setExpandedSections((prev) => new Set([...prev, section.id]))
+      showSnackbar('Sekcja dodana')
+    }
+  }
+
+  const handleUnitSave = (unit: Unit) => {
+    if (editingUnit) {
+      setUnitsBySection((prev) => ({
+        ...prev,
+        [unitSectionId]: (prev[unitSectionId] ?? [])
+          .map((u) => (u.id === unit.id ? unit : u))
+          .sort((a, b) => a.order - b.order),
+      }))
+      showSnackbar('Unit zaktualizowany')
+    } else {
+      setUnitsBySection((prev) => ({
+        ...prev,
+        [unitSectionId]: [...(prev[unitSectionId] ?? []), unit].sort((a, b) => a.order - b.order),
+      }))
+      showSnackbar('Unit dodany')
+    }
+  }
+
+  const handleReorderUnits = (sectionId: string, reordered: Unit[]) => {
+    const updated = reordered.map((u, i) => ({ ...u, order: i + 1 }))
+    setUnitsBySection((prev) => ({ ...prev, [sectionId]: updated }))
+    updated.forEach((u) => updateUnit(u.id, { order: u.order }).catch(() => {}))
+    showSnackbar('Kolejność unitów zmieniona')
   }
 
   const totalUnits = Object.values(unitsBySection).reduce((sum, units) => sum + units.length, 0)
 
   if (loading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 8 }}>
-        <CircularProgress />
-      </Box>
-    )
+    return <PathDetailSkeleton />
   }
 
   if (!path) {
@@ -388,53 +445,62 @@ export default function LearningPathDetailPage() {
                           Brak unitów w tej sekcji
                         </Typography>
                       ) : (
-                        units.map((unit) => (
-                          <Box
-                            key={unit.id}
-                            sx={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              py: 1.5,
-                              px: 1.5,
-                              borderRadius: 2,
-                              '&:hover': { bgcolor: 'action.hover' },
-                              transition: 'background-color 0.15s',
-                            }}
-                          >
-                            <RadioButtonUncheckedIcon
-                              sx={{ color: 'text.secondary', mr: 2, fontSize: 20 }}
-                            />
-                            <Box sx={{ flex: 1 }}>
-                              <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                                {unit.name}
-                              </Typography>
-                              {unit.description && (
-                                <Typography variant="caption" color="text.secondary">
-                                  {unit.description}
+                        <SortableList
+                          items={units}
+                          onReorder={(reordered) => handleReorderUnits(section.id, reordered)}
+                          renderItem={(unit) => (
+                            <Box
+                              sx={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                py: 1.5,
+                                px: 1.5,
+                                borderRadius: 2,
+                                cursor: 'pointer',
+                                '&:hover': { bgcolor: 'action.hover' },
+                                transition: 'background-color 0.15s',
+                              }}
+                              onClick={() => navigate(`/units/${unit.id}`)}
+                            >
+                              <RadioButtonUncheckedIcon
+                                sx={{ color: 'text.secondary', mr: 2, fontSize: 20 }}
+                              />
+                              <Box sx={{ flex: 1 }}>
+                                <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                                  {unit.name}
                                 </Typography>
-                              )}
+                                {unit.description && (
+                                  <Typography variant="caption" color="text.secondary">
+                                    {unit.description}
+                                  </Typography>
+                                )}
+                              </Box>
+                              <Box>
+                                <IconButton
+                                  size="small"
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    setEditingUnit(unit)
+                                    setUnitSectionId(section.id)
+                                    setUnitDialogOpen(true)
+                                  }}
+                                >
+                                  <EditIcon sx={{ fontSize: 16 }} />
+                                </IconButton>
+                                <IconButton
+                                  size="small"
+                                  color="error"
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    setDeleteUnitId(unit.id)
+                                  }}
+                                >
+                                  <DeleteIcon sx={{ fontSize: 16 }} />
+                                </IconButton>
+                              </Box>
                             </Box>
-                            <Box>
-                              <IconButton
-                                size="small"
-                                onClick={() => {
-                                  setEditingUnit(unit)
-                                  setUnitSectionId(section.id)
-                                  setUnitDialogOpen(true)
-                                }}
-                              >
-                                <EditIcon sx={{ fontSize: 16 }} />
-                              </IconButton>
-                              <IconButton
-                                size="small"
-                                color="error"
-                                onClick={() => setDeleteUnitId(unit.id)}
-                              >
-                                <DeleteIcon sx={{ fontSize: 16 }} />
-                              </IconButton>
-                            </Box>
-                          </Box>
-                        ))
+                          )}
+                        />
                       )}
 
                       <Button
@@ -483,7 +549,7 @@ export default function LearningPathDetailPage() {
       <SectionFormDialog
         open={sectionDialogOpen}
         onClose={() => setSectionDialogOpen(false)}
-        onSave={fetchData}
+        onSave={handleSectionSave}
         learningPathId={id!}
         section={editingSection}
         nextOrder={sections.length + 1}
@@ -491,7 +557,7 @@ export default function LearningPathDetailPage() {
       <UnitFormDialog
         open={unitDialogOpen}
         onClose={() => setUnitDialogOpen(false)}
-        onSave={fetchData}
+        onSave={handleUnitSave}
         sectionId={unitSectionId}
         unit={editingUnit}
         nextOrder={(unitsBySection[unitSectionId]?.length ?? 0) + 1}

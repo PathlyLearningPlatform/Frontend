@@ -11,7 +11,7 @@ import type { Unit } from '../types/api'
 interface UnitFormDialogProps {
   open: boolean
   onClose: () => void
-  onSave: () => void
+  onSave: (unit: Unit) => void
   sectionId: string
   unit?: Unit
   nextOrder: number
@@ -35,12 +35,15 @@ export default function UnitFormDialog({ open, onClose, onSave, sectionId, unit,
     if (!name.trim()) return
     setSaving(true)
     try {
+      let result: Unit
       if (unit) {
-        await updateUnit(unit.id, { name: name.trim(), description: description.trim() || undefined, order })
+        const data = await updateUnit(unit.id, { name: name.trim(), description: description.trim() || undefined, order })
+        result = data.unit
       } else {
-        await createUnit({ name: name.trim(), description: description.trim() || undefined, order, sectionId })
+        const data = await createUnit({ name: name.trim(), description: description.trim() || undefined, order, sectionId })
+        result = data.unit
       }
-      onSave()
+      onSave(result)
       onClose()
     } catch {
       // TODO: show error

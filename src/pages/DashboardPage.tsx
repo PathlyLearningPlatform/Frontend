@@ -4,7 +4,7 @@ import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import TextField from '@mui/material/TextField'
 import InputAdornment from '@mui/material/InputAdornment'
-import CircularProgress from '@mui/material/CircularProgress'
+import { DashboardSkeleton } from '../components/PageSkeleton'
 import Alert from '@mui/material/Alert'
 import Paper from '@mui/material/Paper'
 import Chip from '@mui/material/Chip'
@@ -16,8 +16,10 @@ import { getLearningPaths, deleteLearningPath } from '../api'
 import type { LearningPath } from '../types/api'
 import LearningPathCard from '../components/LearningPathCard'
 import ConfirmDialog from '../components/ConfirmDialog'
+import { useSnackbar } from '../context/SnackbarContext'
 
 export default function DashboardPage() {
+  const { showSnackbar } = useSnackbar()
   const [paths, setPaths] = useState<LearningPath[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -43,13 +45,16 @@ export default function DashboardPage() {
 
   const handleDelete = async () => {
     if (!deleteId) return
+    // Optimistic: remove from UI immediately
+    const removedId = deleteId
+    setPaths((prev) => prev.filter((p) => p.id !== removedId))
+    setDeleteId(null)
     try {
-      await deleteLearningPath(deleteId)
-      setDeleteId(null)
-      fetchPaths()
+      await deleteLearningPath(removedId)
+      showSnackbar('Ścieżka usunięta')
     } catch {
       setError('Nie udało się usunąć ścieżki.')
-      setDeleteId(null)
+      fetchPaths() // rollback on error
     }
   }
 
@@ -145,9 +150,7 @@ export default function DashboardPage() {
       </Box>
 
       {loading ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 6 }}>
-          <CircularProgress />
-        </Box>
+        <DashboardSkeleton />
       ) : filteredPaths.length === 0 ? (
         <Paper sx={{ p: 6, textAlign: 'center' }}>
           <AutoStoriesIcon sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
