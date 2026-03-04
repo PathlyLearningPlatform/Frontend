@@ -10,6 +10,9 @@ import LearningPathDetailPage from './pages/LearningPathDetailPage'
 import LearningPathFormPage from './pages/LearningPathFormPage'
 import UnitDetailPage from './pages/UnitDetailPage'
 import LessonDetailPage from './pages/LessonDetailPage'
+import QuizDetailPage from './pages/QuizDetailPage'
+import ArticleDetailPage from './pages/ArticleDetailPage'
+import ExerciseDetailPage from './pages/ExerciseDetailPage'
 import NotFoundPage from './pages/NotFoundPage'
 
 function App() {
@@ -28,6 +31,9 @@ function App() {
           <Route path="/learning-paths/:id/edit" element={<LearningPathFormPage />} />
           <Route path="/units/:unitId" element={<UnitDetailPage />} />
           <Route path="/lessons/:lessonId" element={<LessonDetailPage />} />
+          <Route path="/activities/quiz/:activityId" element={<QuizDetailPage />} />
+          <Route path="/activities/article/:activityId" element={<ArticleDetailPage />} />
+          <Route path="/activities/exercise/:activityId" element={<ExerciseDetailPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Routes>

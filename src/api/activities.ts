@@ -4,12 +4,15 @@ import type {
   CreateArticle,
   CreateExercise,
   CreateQuiz,
+  CreateQuestion,
   Exercise,
   PaginationParams,
+  Question,
   Quiz,
   UpdateArticle,
   UpdateExercise,
   UpdateQuiz,
+  UpdateQuestion,
 } from '../types/api'
 import { apiClient } from './client'
 
@@ -51,4 +54,21 @@ export function createQuiz(data: CreateQuiz) {
 
 export function updateQuiz(id: string, data: UpdateQuiz) {
   return apiClient.patch<{ quiz: Quiz }>(`/v1/quizzes/${id}`, data)
+}
+
+// Questions
+export function getQuestions(quizId: string) {
+  return apiClient.get<{ questions: Question[] }>(`/v1/quizzes/${quizId}/questions`)
+}
+
+export function createQuestion(quizId: string, data: CreateQuestion) {
+  return apiClient.post<{ question: Question }>(`/v1/quizzes/${quizId}/questions`, data)
+}
+
+export function updateQuestion(quizId: string, questionId: string, data: UpdateQuestion) {
+  return apiClient.patch<{ question: Question }>(`/v1/quizzes/${quizId}/questions/${questionId}`, data)
+}
+
+export function deleteQuestion(quizId: string, questionId: string) {
+  return apiClient.delete<void>(`/v1/quizzes/${quizId}/questions/${questionId}`)
 }

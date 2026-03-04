@@ -231,7 +231,10 @@ export default function LessonDetailPage() {
                     p: 2.5,
                     display: 'flex',
                     alignItems: 'center',
+                    cursor: 'pointer',
+                    '&:hover': { bgcolor: 'action.hover' },
                   }}
+                  onClick={() => navigate(`/activities/${activity.type}/${activity.id}`)}
                 >
                   <Box
                     sx={{
@@ -292,7 +295,8 @@ export default function LessonDetailPage() {
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                     <IconButton
                       size="small"
-                      onClick={() => {
+                      onClick={(e) => {
+                        e.stopPropagation()
                         setEditingActivity(activity)
                         setActivityDialogOpen(true)
                       }}
@@ -302,7 +306,10 @@ export default function LessonDetailPage() {
                     <IconButton
                       size="small"
                       color="error"
-                      onClick={() => setDeleteActivityId(activity.id)}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setDeleteActivityId(activity.id)
+                      }}
                     >
                       <DeleteIcon fontSize="small" />
                     </IconButton>

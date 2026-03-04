@@ -173,3 +173,22 @@ export interface UpdateQuiz {
   description?: string
   order?: number
 }
+
+// Questions
+export interface Question {
+  id: string
+  quizId: string
+  order: number
+  content: string
+  correctAnswer: string
+}
+
+export interface CreateQuestion {
+  content: string
+  correctAnswer: string
+}
+
+export interface UpdateQuestion {
+  content?: string
+  correctAnswer?: string
+}
