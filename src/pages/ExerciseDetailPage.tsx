@@ -12,11 +12,14 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { getActivity, getLesson } from '../api'
 import type { Activity, Lesson } from '../types/api'
 
-const difficultyConfig = {
+const difficultyConfig: Record<string, { label: string; color: string }> = {
+  EASY: { label: 'Łatwy', color: '#4CAF50' },
+  MEDIUM: { label: 'Średni', color: '#FF9800' },
+  HARD: { label: 'Trudny', color: '#F44336' },
   easy: { label: 'Łatwy', color: '#4CAF50' },
   medium: { label: 'Średni', color: '#FF9800' },
   hard: { label: 'Trudny', color: '#F44336' },
-} as const
+}
 
 export default function ExerciseDetailPage() {
   const { activityId } = useParams()
@@ -52,7 +55,7 @@ export default function ExerciseDetailPage() {
   if (!exercise) return <Alert severity="error">Nie znaleziono ćwiczenia.</Alert>
 
   const difficulty = 'difficulty' in exercise
-    ? (exercise as unknown as { difficulty: 'easy' | 'medium' | 'hard' }).difficulty
+    ? (exercise as unknown as { difficulty: 'EASY' | 'MEDIUM' | 'HARD' }).difficulty
     : null
   const config = difficulty ? difficultyConfig[difficulty] : null
 

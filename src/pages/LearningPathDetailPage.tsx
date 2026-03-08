@@ -15,10 +15,10 @@ import AddIcon from '@mui/icons-material/Add'
 import EditIcon from '@mui/icons-material/Edit'
 import DeleteIcon from '@mui/icons-material/Delete'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
-import ExpandLessIcon from '@mui/icons-material/ExpandLess'
 import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked'
 import MenuBookIcon from '@mui/icons-material/MenuBook'
 import { useParams, useNavigate } from 'react-router-dom'
+import { motion } from 'framer-motion'
 import {
   getLearningPath,
   deleteLearningPath,
@@ -34,6 +34,9 @@ import SectionFormDialog from '../components/SectionFormDialog'
 import UnitFormDialog from '../components/UnitFormDialog'
 import SortableList from '../components/SortableList'
 import { useSnackbar } from '../context/SnackbarContext'
+
+const MotionBox = motion.create(Box)
+const MotionPaper = motion.create(Paper)
 
 export default function LearningPathDetailPage() {
   const { id } = useParams()
@@ -122,7 +125,6 @@ export default function LearningPathDetailPage() {
 
   const handleDeleteSection = async () => {
     if (!deleteSectionId) return
-    // Optimistic: remove from UI immediately
     const removedId = deleteSectionId
     setSections((prev) => prev.filter((s) => s.id !== removedId))
     setUnitsBySection((prev) => {
@@ -136,7 +138,7 @@ export default function LearningPathDetailPage() {
       showSnackbar('Sekcja usunięta')
     } catch {
       setError('Nie udało się usunąć sekcji.')
-      fetchData() // rollback on error
+      fetchData()
     }
   }
 
@@ -211,37 +213,55 @@ export default function LearningPathDetailPage() {
 
   return (
     <>
-      <Breadcrumbs sx={{ mb: 3 }}>
-        <Link underline="hover" color="inherit" sx={{ cursor: 'pointer' }} onClick={() => navigate('/')}>
-          Pulpit
-        </Link>
-        <Link underline="hover" color="inherit" sx={{ cursor: 'pointer' }} onClick={() => navigate('/explore')}>
-          Ścieżki
-        </Link>
-        <Typography color="text.primary">{path.name}</Typography>
-      </Breadcrumbs>
+      <motion.div
+        initial={{ opacity: 0, x: -10 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.3 }}
+      >
+        <Breadcrumbs sx={{ mb: 3 }}>
+          <Link underline="hover" color="inherit" sx={{ cursor: 'pointer' }} onClick={() => navigate('/')}>
+            Pulpit
+          </Link>
+          <Link underline="hover" color="inherit" sx={{ cursor: 'pointer' }} onClick={() => navigate('/explore')}>
+            Ścieżki
+          </Link>
+          <Typography color="text.primary">{path.name}</Typography>
+        </Breadcrumbs>
+      </motion.div>
 
       {error && (
-        <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
-          {error}
-        </Alert>
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
+            {error}
+          </Alert>
+        </motion.div>
       )}
 
       {/* Hero header */}
-      <Paper
+      <MotionPaper
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
         sx={{
           p: 4,
           mb: 4,
-          background: 'linear-gradient(135deg, #6C63FF 0%, #9590FF 100%)',
+          background: 'linear-gradient(135deg, #6C63FF 0%, #9590FF 50%, #00D2FF 100%)',
           color: 'white',
           position: 'relative',
           overflow: 'hidden',
         }}
       >
+        {/* Decorative shapes */}
+        <Box sx={{ position: 'absolute', width: 180, height: 180, borderRadius: '50%', bgcolor: 'rgba(255,255,255,0.08)', top: -50, right: -20 }} />
+        <Box sx={{ position: 'absolute', width: 100, height: 100, borderRadius: '50%', bgcolor: 'rgba(255,255,255,0.06)', bottom: -30, right: 80 }} />
+        <Box sx={{ position: 'absolute', width: 60, height: 60, borderRadius: '50%', bgcolor: 'rgba(255,255,255,0.07)', top: 20, right: 180 }} />
         <Box sx={{ position: 'relative', zIndex: 1 }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
             <Box sx={{ flex: 1 }}>
-              <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
+              <Typography variant="h4" sx={{ fontWeight: 800, mb: 1, letterSpacing: '-0.02em' }}>
                 {path.name}
               </Typography>
               {path.description && (
@@ -252,27 +272,43 @@ export default function LearningPathDetailPage() {
               <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
                 <Chip
                   label={`${sections.length} sekcji`}
-                  sx={{ bgcolor: 'rgba(255,255,255,0.2)', color: 'white' }}
+                  sx={{ bgcolor: 'rgba(255,255,255,0.18)', color: 'white', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.25)' }}
                 />
                 <Chip
                   label={`${totalUnits} unitów`}
-                  sx={{ bgcolor: 'rgba(255,255,255,0.2)', color: 'white' }}
+                  sx={{ bgcolor: 'rgba(255,255,255,0.18)', color: 'white', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.25)' }}
                 />
               </Box>
             </Box>
             <Box sx={{ display: 'flex', gap: 1 }}>
-              <IconButton
-                sx={{ color: 'white', bgcolor: 'rgba(255,255,255,0.15)', '&:hover': { bgcolor: 'rgba(255,255,255,0.25)' } }}
-                onClick={() => navigate(`/learning-paths/${id}/edit`)}
-              >
-                <EditIcon />
-              </IconButton>
-              <IconButton
-                sx={{ color: 'white', bgcolor: 'rgba(255,255,255,0.15)', '&:hover': { bgcolor: 'rgba(255,255,255,0.25)' } }}
-                onClick={() => setDeletePathOpen(true)}
-              >
-                <DeleteIcon />
-              </IconButton>
+              <motion.div whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.9 }}>
+                <IconButton
+                  sx={{
+                    color: 'white',
+                    bgcolor: 'rgba(255,255,255,0.15)',
+                    backdropFilter: 'blur(8px)',
+                    border: '1px solid rgba(255,255,255,0.25)',
+                    '&:hover': { bgcolor: 'rgba(255,255,255,0.3)' },
+                  }}
+                  onClick={() => navigate(`/learning-paths/${id}/edit`)}
+                >
+                  <EditIcon />
+                </IconButton>
+              </motion.div>
+              <motion.div whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.9 }}>
+                <IconButton
+                  sx={{
+                    color: 'white',
+                    bgcolor: 'rgba(255,255,255,0.15)',
+                    backdropFilter: 'blur(8px)',
+                    border: '1px solid rgba(255,255,255,0.25)',
+                    '&:hover': { bgcolor: 'rgba(255,255,255,0.3)' },
+                  }}
+                  onClick={() => setDeletePathOpen(true)}
+                >
+                  <DeleteIcon />
+                </IconButton>
+              </motion.div>
             </Box>
           </Box>
 
@@ -294,26 +330,38 @@ export default function LearningPathDetailPage() {
             />
           </Box>
         </Box>
-      </Paper>
+      </MotionPaper>
 
       {/* Sections roadmap */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+      <MotionBox
+        initial={{ opacity: 0, y: 15 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.2 }}
+        sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}
+      >
         <Typography variant="h5">Plan nauki</Typography>
-        <Button
-          variant="contained"
-          size="small"
-          startIcon={<AddIcon />}
-          onClick={() => {
-            setEditingSection(undefined)
-            setSectionDialogOpen(true)
-          }}
-        >
-          Dodaj sekcję
-        </Button>
-      </Box>
+        <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+          <Button
+            variant="contained"
+            size="small"
+            startIcon={<AddIcon />}
+            onClick={() => {
+              setEditingSection(undefined)
+              setSectionDialogOpen(true)
+            }}
+          >
+            Dodaj sekcję
+          </Button>
+        </motion.div>
+      </MotionBox>
 
       {sections.length === 0 ? (
-        <Paper sx={{ p: 6, textAlign: 'center' }}>
+        <MotionPaper
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+          sx={{ p: 6, textAlign: 'center' }}
+        >
           <MenuBookIcon sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
           <Typography variant="h6" color="text.secondary" gutterBottom>
             Brak sekcji
@@ -331,7 +379,7 @@ export default function LearningPathDetailPage() {
           >
             Dodaj sekcję
           </Button>
-        </Paper>
+        </MotionPaper>
       ) : (
         <Box sx={{ position: 'relative' }}>
           {/* Timeline line */}
@@ -342,7 +390,9 @@ export default function LearningPathDetailPage() {
               top: 0,
               bottom: 0,
               width: 3,
-              bgcolor: 'divider',
+              background: 'linear-gradient(180deg, #6C63FF 0%, #00D2FF 100%)',
+              opacity: 0.3,
+              borderRadius: 2,
               display: { xs: 'none', sm: 'block' },
             }}
           />
@@ -352,35 +402,55 @@ export default function LearningPathDetailPage() {
             const isExpanded = expandedSections.has(section.id)
 
             return (
-              <Box key={section.id} sx={{ position: 'relative', mb: 2 }}>
+              <MotionBox
+                key={section.id}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5, delay: 0.3 + index * 0.1, ease: [0.16, 1, 0.3, 1] }}
+                sx={{ position: 'relative', mb: 2 }}
+              >
                 {/* Timeline dot */}
-                <Box
-                  sx={{
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ duration: 0.4, delay: 0.4 + index * 0.1, type: 'spring', stiffness: 300 }}
+                  style={{
                     position: 'absolute',
                     left: 12,
                     top: 20,
-                    width: 27,
-                    height: 27,
-                    borderRadius: '50%',
-                    bgcolor: 'primary.main',
-                    color: 'white',
-                    display: { xs: 'none', sm: 'flex' },
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: 12,
-                    fontWeight: 700,
                     zIndex: 1,
                   }}
                 >
-                  {index + 1}
-                </Box>
+                  <Box
+                    sx={{
+                      width: 27,
+                      height: 27,
+                      borderRadius: '50%',
+                      background: 'linear-gradient(135deg, #6C63FF, #00D2FF)',
+                      color: 'white',
+                      display: { xs: 'none', sm: 'flex' },
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: 12,
+                      fontWeight: 700,
+                      boxShadow: '0 3px 12px rgba(108, 99, 255, 0.35)',
+                    }}
+                  >
+                    {index + 1}
+                  </Box>
+                </motion.div>
 
                 <Paper
                   sx={{
                     ml: { xs: 0, sm: 7 },
                     overflow: 'hidden',
-                    transition: 'box-shadow 0.2s',
-                    '&:hover': { boxShadow: '0 4px 16px rgba(0,0,0,0.1)' },
+                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                    '&:hover': {
+                      boxShadow: (theme) => theme.palette.mode === 'dark'
+                        ? '0 12px 32px rgba(108, 99, 255, 0.2)'
+                        : '0 12px 32px rgba(108, 99, 255, 0.12)',
+                      transform: 'translateX(4px)',
+                    },
                   }}
                 >
                   {/* Section header */}
@@ -420,6 +490,10 @@ export default function LearningPathDetailPage() {
                           setEditingSection(section)
                           setSectionDialogOpen(true)
                         }}
+                        sx={{
+                          transition: 'all 0.2s',
+                          '&:hover': { bgcolor: 'primary.main', color: 'white', transform: 'scale(1.1)' },
+                        }}
                       >
                         <EditIcon fontSize="small" />
                       </IconButton>
@@ -430,10 +504,19 @@ export default function LearningPathDetailPage() {
                           e.stopPropagation()
                           setDeleteSectionId(section.id)
                         }}
+                        sx={{
+                          transition: 'all 0.2s',
+                          '&:hover': { bgcolor: 'error.main', color: 'white', transform: 'scale(1.1)' },
+                        }}
                       >
                         <DeleteIcon fontSize="small" />
                       </IconButton>
-                      {isExpanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                      <motion.div
+                        animate={{ rotate: isExpanded ? 180 : 0 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        <ExpandMoreIcon />
+                      </motion.div>
                     </Box>
                   </Box>
 
@@ -457,8 +540,11 @@ export default function LearningPathDetailPage() {
                                 px: 1.5,
                                 borderRadius: 2,
                                 cursor: 'pointer',
-                                '&:hover': { bgcolor: 'action.hover' },
-                                transition: 'background-color 0.15s',
+                                transition: 'all 0.2s',
+                                '&:hover': {
+                                  bgcolor: 'action.hover',
+                                  transform: 'translateX(4px)',
+                                },
                               }}
                               onClick={() => navigate(`/units/${unit.id}`)}
                             >
@@ -484,6 +570,10 @@ export default function LearningPathDetailPage() {
                                     setUnitSectionId(section.id)
                                     setUnitDialogOpen(true)
                                   }}
+                                  sx={{
+                                    transition: 'all 0.2s',
+                                    '&:hover': { color: 'primary.main', transform: 'scale(1.15)' },
+                                  }}
                                 >
                                   <EditIcon sx={{ fontSize: 16 }} />
                                 </IconButton>
@@ -493,6 +583,10 @@ export default function LearningPathDetailPage() {
                                   onClick={(e) => {
                                     e.stopPropagation()
                                     setDeleteUnitId(unit.id)
+                                  }}
+                                  sx={{
+                                    transition: 'all 0.2s',
+                                    '&:hover': { transform: 'scale(1.15)' },
                                   }}
                                 >
                                   <DeleteIcon sx={{ fontSize: 16 }} />
@@ -518,7 +612,7 @@ export default function LearningPathDetailPage() {
                     </Box>
                   </Collapse>
                 </Paper>
-              </Box>
+              </MotionBox>
             )
           })}
         </Box>

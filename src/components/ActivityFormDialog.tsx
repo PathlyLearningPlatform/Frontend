@@ -22,7 +22,7 @@ export default function ActivityFormDialog({ open, onClose, onSave, lessonId, ac
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [order, setOrder] = useState(nextOrder)
-  const [type, setType] = useState<ActivityType>('article')
+  const [type, setType] = useState<ActivityType>('ARTICLE')
   const [ref, setRef] = useState('')
   const [difficulty, setDifficulty] = useState<ExerciseDifficulty>('easy')
   const [saving, setSaving] = useState(false)
@@ -34,7 +34,7 @@ export default function ActivityFormDialog({ open, onClose, onSave, lessonId, ac
       setName(activity?.name ?? '')
       setDescription(activity?.description ?? '')
       setOrder(activity?.order ?? nextOrder)
-      setType(activity?.type ?? 'article')
+      setType(activity?.type ?? 'ARTICLE')
       setRef(activity && 'ref' in activity ? (activity as unknown as { ref: string }).ref : '')
       setDifficulty(activity && 'difficulty' in activity ? (activity as unknown as { difficulty: ExerciseDifficulty }).difficulty : 'easy')
     }
@@ -45,29 +45,29 @@ export default function ActivityFormDialog({ open, onClose, onSave, lessonId, ac
     setSaving(true)
     try {
       let result: Activity
-      if (type === 'article') {
+      if (type === 'ARTICLE') {
         if (isEdit && activity) {
           const data = await updateArticle(activity.id, { name: name.trim(), description: description.trim() || undefined, order, ref: ref.trim() || undefined })
-          result = { ...data.article, type: 'article' }
+          result = { ...data.article, type: 'ARTICLE' }
         } else {
           const data = await createArticle({ name: name.trim(), description: description.trim() || undefined, order, lessonId, ref: ref.trim() })
-          result = { ...data.article, type: 'article' }
+          result = { ...data.article, type: 'ARTICLE' }
         }
-      } else if (type === 'exercise') {
+      } else if (type === 'EXERCISE') {
         if (isEdit && activity) {
           const data = await updateExercise(activity.id, { name: name.trim(), description: description.trim() || undefined, order, difficulty })
-          result = { ...data.exercise, type: 'exercise' }
+          result = { ...data.exercise, type: 'EXERCISE' }
         } else {
           const data = await createExercise({ name: name.trim(), description: description.trim() || undefined, order, lessonId, difficulty })
-          result = { ...data.exercise, type: 'exercise' }
+          result = { ...data.exercise, type: 'EXERCISE' }
         }
       } else {
         if (isEdit && activity) {
           const data = await updateQuiz(activity.id, { name: name.trim(), description: description.trim() || undefined, order })
-          result = { ...data.quiz, type: 'quiz' }
+          result = { ...data.quiz, type: 'QUIZ' }
         } else {
           const data = await createQuiz({ name: name.trim(), description: description.trim() || undefined, order, lessonId })
-          result = { ...data.quiz, type: 'quiz' }
+          result = { ...data.quiz, type: 'QUIZ' }
         }
       }
       onSave(result)
@@ -92,9 +92,9 @@ export default function ActivityFormDialog({ open, onClose, onSave, lessonId, ac
           onChange={(e) => setType(e.target.value as ActivityType)}
           disabled={isEdit}
         >
-          <MenuItem value="article">Artykuł</MenuItem>
-          <MenuItem value="exercise">Ćwiczenie</MenuItem>
-          <MenuItem value="quiz">Quiz</MenuItem>
+          <MenuItem value="ARTICLE">Artykuł</MenuItem>
+          <MenuItem value="EXERCISE">Ćwiczenie</MenuItem>
+          <MenuItem value="QUIZ">Quiz</MenuItem>
         </TextField>
         <TextField
           autoFocus
@@ -122,7 +122,7 @@ export default function ActivityFormDialog({ open, onClose, onSave, lessonId, ac
           value={order}
           onChange={(e) => setOrder(Number(e.target.value))}
         />
-        {type === 'article' && (
+        {type === 'ARTICLE' && (
           <TextField
             margin="dense"
             label="Link do artykułu"
@@ -133,7 +133,7 @@ export default function ActivityFormDialog({ open, onClose, onSave, lessonId, ac
             placeholder="https://..."
           />
         )}
-        {type === 'exercise' && (
+        {type === 'EXERCISE' && (
           <TextField
             select
             margin="dense"

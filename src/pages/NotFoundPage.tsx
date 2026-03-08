@@ -5,9 +5,11 @@ import Paper from '@mui/material/Paper'
 import HomeIcon from '@mui/icons-material/Home'
 import SentimentDissatisfiedIcon from '@mui/icons-material/SentimentDissatisfied'
 import { useNavigate } from 'react-router-dom'
+import { useLanguage } from '../context/LanguageContext'
 
 export default function NotFoundPage() {
   const navigate = useNavigate()
+  const { t } = useLanguage()
 
   return (
     <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
@@ -17,13 +19,13 @@ export default function NotFoundPage() {
           404
         </Typography>
         <Typography variant="h6" color="text.secondary" gutterBottom>
-          Strona nie znaleziona
+          {t('common.notFound')}
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-          Strona, której szukasz, nie istnieje lub została przeniesiona.
+          {t('common.notFoundDesc')}
         </Typography>
         <Button variant="contained" startIcon={<HomeIcon />} onClick={() => navigate('/')}>
-          Wróć na pulpit
+          {t('common.backToDashboard')}
         </Button>
       </Paper>
     </Box>

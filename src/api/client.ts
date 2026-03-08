@@ -3,16 +3,28 @@ import type { ApiError } from '../types/api'
 const BASE_URL = '/api'
 
 class ApiClient {
+  private token: string | null = null
+
+  setToken(token: string | null) {
+    this.token = token
+  }
+
   private async request<T>(
     endpoint: string,
     options?: RequestInit,
   ): Promise<T> {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      ...(options?.headers as Record<string, string>),
+    }
+
+    if (this.token) {
+      headers['Authorization'] = `Bearer ${this.token}`
+    }
+
     const response = await fetch(`${BASE_URL}${endpoint}`, {
-      headers: {
-        'Content-Type': 'application/json',
-        ...options?.headers,
-      },
       ...options,
+      headers,
     })
 
     if (!response.status.toString().startsWith('2')) {

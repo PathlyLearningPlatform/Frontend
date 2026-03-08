@@ -103,7 +103,7 @@ export interface UpdateLesson {
 }
 
 // Activities
-export type ActivityType = 'article' | 'exercise' | 'quiz'
+export type ActivityType = 'ARTICLE' | 'EXERCISE' | 'QUIZ'
 export type ExerciseDifficulty = 'easy' | 'medium' | 'hard'
 
 export interface Activity {
@@ -112,23 +112,23 @@ export interface Activity {
   name: string
   description: string | null
   order: number
-  type: ActivityType
+  type?: ActivityType
   createdAt: string
   updatedAt: string | null
 }
 
 export interface Article extends Activity {
-  type: 'article'
+  type: 'ARTICLE'
   ref: string
 }
 
 export interface Exercise extends Activity {
-  type: 'exercise'
+  type: 'EXERCISE'
   difficulty: ExerciseDifficulty
 }
 
 export interface Quiz extends Activity {
-  type: 'quiz'
+  type: 'QUIZ'
 }
 
 export interface CreateArticle {

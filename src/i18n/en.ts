@@ -1,0 +1,149 @@
+const en: Record<string, string> = {
+  // Sidebar
+  'nav.dashboard': 'Dashboard',
+  'nav.explore': 'Explore paths',
+  'nav.myPaths': 'My paths',
+  'nav.progress': 'My progress',
+  'nav.profile': 'Profile',
+  'nav.settings': 'Settings',
+  'nav.newPath': 'New path',
+  'nav.menu': 'Menu',
+  'nav.account': 'Account',
+  'nav.lightTheme': 'Light theme',
+  'nav.darkTheme': 'Dark theme',
+  'nav.switchToLight': 'Switch to light theme',
+  'nav.switchToDark': 'Switch to dark theme',
+
+  // Auth
+  'auth.login': 'Log in',
+  'auth.logout': 'Log out',
+  'auth.register': 'Register',
+  'auth.user': 'User',
+  'auth.notLoggedIn': 'Not logged in',
+
+  // Dashboard
+  'dashboard.welcome': 'Welcome to Pathly',
+  'dashboard.subtitle': 'Discover learning paths and develop your skills. Create courses and track progress.',
+  'dashboard.search': 'Search learning paths...',
+  'dashboard.available': 'Available paths',
+  'dashboard.inProgress': 'In progress',
+  'dashboard.completed': 'Completed',
+  'dashboard.allPaths': 'All paths',
+  'dashboard.noPathsFound': 'No paths found',
+  'dashboard.noPaths': 'No learning paths',
+  'dashboard.changeSearch': 'Try changing your search criteria',
+  'dashboard.createFirst': 'Create your first path to get started',
+  'dashboard.fetchError': 'Failed to fetch learning paths. Check if the backend is running.',
+  'dashboard.deleteError': 'Failed to delete the path.',
+  'dashboard.pathDeleted': 'Path deleted',
+
+  // Learning Path
+  'path.progress': 'Progress',
+  'path.new': 'New',
+  'path.sections': 'sections',
+  'path.units': 'units',
+  'path.learningPlan': 'Learning plan',
+  'path.addSection': 'Add section',
+  'path.noSections': 'No sections',
+  'path.addFirstSection': 'Add the first section to this learning path',
+  'path.noUnits': 'No units in this section',
+  'path.addUnit': 'Add unit',
+  'path.notFound': 'Learning path not found.',
+  'path.fetchError': 'Failed to fetch data.',
+
+  // CRUD
+  'crud.delete': 'Delete',
+  'crud.cancel': 'Cancel',
+  'crud.save': 'Save',
+  'crud.saving': 'Saving...',
+  'crud.edit': 'Edit',
+  'crud.create': 'Create',
+  'crud.name': 'Name',
+  'crud.description': 'Description',
+  'crud.order': 'Order',
+
+  // Delete confirmations
+  'delete.path': 'Delete learning path',
+  'delete.pathMessage': 'Are you sure you want to delete this path? This action cannot be undone.',
+  'delete.section': 'Delete section',
+  'delete.sectionMessage': 'Are you sure you want to delete this section?',
+  'delete.unit': 'Delete unit',
+  'delete.unitMessage': 'Are you sure you want to delete this unit?',
+  'delete.lesson': 'Delete lesson',
+  'delete.lessonMessage': 'Are you sure you want to delete this lesson?',
+  'delete.activity': 'Delete activity',
+  'delete.activityMessage': 'Are you sure you want to delete this activity?',
+
+  // Sections & Units
+  'section.updated': 'Section updated',
+  'section.added': 'Section added',
+  'section.deleted': 'Section deleted',
+  'section.deleteError': 'Failed to delete section.',
+  'unit.updated': 'Unit updated',
+  'unit.added': 'Unit added',
+  'unit.deleted': 'Unit deleted',
+  'unit.deleteError': 'Failed to delete unit.',
+  'unit.reordered': 'Unit order changed',
+
+  // Activities
+  'activity.article': 'Article',
+  'activity.exercise': 'Exercise',
+  'activity.quiz': 'Quiz',
+  'activity.type': 'Type',
+  'activity.editActivity': 'Edit activity',
+  'activity.newActivity': 'New activity',
+  'activity.articleLink': 'Article link',
+  'activity.difficulty': 'Difficulty level',
+  'activity.easy': 'Easy',
+  'activity.medium': 'Medium',
+  'activity.hard': 'Hard',
+
+  // Lessons
+  'lesson.addLesson': 'Add lesson',
+  'lesson.editLesson': 'Edit lesson',
+  'lesson.newLesson': 'New lesson',
+  'lesson.noLessons': 'No lessons in this unit',
+
+  // Settings
+  'settings.title': 'Settings',
+  'settings.appearance': 'Appearance',
+  'settings.darkMode': 'Dark mode',
+  'settings.language': 'Language',
+  'settings.polish': 'Polski',
+  'settings.english': 'English',
+
+  // Profile
+  'profile.title': 'Profile',
+  'profile.email': 'Email',
+  'profile.firstName': 'First name',
+  'profile.lastName': 'Last name',
+  'profile.username': 'Username',
+
+  // My Paths
+  'myPaths.title': 'My paths',
+  'myPaths.subtitle': 'Learning paths you are enrolled in',
+  'myPaths.empty': 'You don\'t have any paths yet',
+  'myPaths.emptyHint': 'Browse available paths and start learning',
+  'myPaths.explore': 'Browse paths',
+  'myPaths.backendNote': 'This feature requires an enrollment system in the backend. It will appear once the backend supports it.',
+
+  // Progress
+  'progress.title': 'My progress',
+  'progress.subtitle': 'Track your learning progress',
+  'progress.started': 'Started',
+  'progress.completed': 'Completed',
+  'progress.studyTime': 'Study time',
+  'progress.achievements': 'Achievements',
+  'progress.overall': 'Overall progress',
+  'progress.backendNote': 'This feature requires a progress tracking system in the backend. Statistics will update automatically once this feature is added.',
+
+  // Common
+  'common.loading': 'Loading...',
+  'common.error': 'An error occurred',
+  'common.paths': 'Paths',
+  'common.backToDashboard': 'Back to dashboard',
+  'common.notFound': 'Page not found',
+  'common.notFoundDesc': 'The page you are looking for does not exist or has been moved.',
+}
+
+export default en

@@ -26,16 +26,19 @@ import SortableList from '../components/SortableList'
 import { useSnackbar } from '../context/SnackbarContext'
 
 const typeConfig = {
-  article: { label: 'Artykuł', icon: ArticleIcon, color: '#2196F3' },
-  exercise: { label: 'Ćwiczenie', icon: FitnessCenterIcon, color: '#FF9800' },
-  quiz: { label: 'Quiz', icon: QuizIcon, color: '#9C27B0' },
+  ARTICLE: { label: 'Artykuł', icon: ArticleIcon, color: '#2196F3' },
+  EXERCISE: { label: 'Ćwiczenie', icon: FitnessCenterIcon, color: '#FF9800' },
+  QUIZ: { label: 'Quiz', icon: QuizIcon, color: '#9C27B0' },
 } as const
 
-const difficultyLabels = {
+const difficultyLabels: Record<string, string> = {
+  EASY: 'Łatwy',
+  MEDIUM: 'Średni',
+  HARD: 'Trudny',
   easy: 'Łatwy',
   medium: 'Średni',
   hard: 'Trudny',
-} as const
+}
 
 export default function LessonDetailPage() {
   const { lessonId } = useParams()
@@ -52,6 +55,17 @@ export default function LessonDetailPage() {
   const [activityDialogOpen, setActivityDialogOpen] = useState(false)
   const [editingActivity, setEditingActivity] = useState<Activity | undefined>(undefined)
 
+  // Persist activity types in sessionStorage (backend doesn't return type)
+  const saveTypeCache = (acts: Activity[]) => {
+    const cache = JSON.parse(sessionStorage.getItem('activityTypes') ?? '{}')
+    acts.forEach((a) => { if (a.type) cache[a.id] = a.type })
+    sessionStorage.setItem('activityTypes', JSON.stringify(cache))
+  }
+  const applyTypeCache = (acts: Activity[]): Activity[] => {
+    const cache = JSON.parse(sessionStorage.getItem('activityTypes') ?? '{}') as Record<string, string>
+    return acts.map((a) => ({ ...a, type: a.type ?? cache[a.id] as Activity['type'] }))
+  }
+
   const fetchData = useCallback(async () => {
     if (!lessonId) return
     setLoading(true)
@@ -66,11 +80,10 @@ export default function LessonDetailPage() {
         const unitData = await getUnit(lessonData.lesson.unitId)
         setParentUnit(unitData.unit)
       } catch { /* breadcrumbs fallback */ }
-      setActivities(
-        activitiesData.activities
-          .filter((a) => a.lessonId === lessonId)
-          .sort((a, b) => a.order - b.order)
-      )
+      const filtered = activitiesData.activities
+        .filter((a) => a.lessonId === lessonId)
+        .sort((a, b) => a.order - b.order)
+      setActivities(applyTypeCache(filtered))
     } catch {
       setError('Nie udało się pobrać danych.')
     } finally {
@@ -97,6 +110,7 @@ export default function LessonDetailPage() {
   }
 
   const handleActivitySave = (activity: Activity) => {
+    saveTypeCache([activity])
     if (editingActivity) {
       setActivities((prev) =>
         prev.map((a) => (a.id === activity.id ? activity : a)).sort((a, b) => a.order - b.order)
@@ -113,8 +127,9 @@ export default function LessonDetailPage() {
     setActivities(updated)
     updated.forEach((a) => {
       const payload = { order: a.order }
-      if (a.type === 'article') updateArticle(a.id, payload).catch(() => {})
-      else if (a.type === 'exercise') updateExercise(a.id, payload).catch(() => {})
+      const t = (a.type ?? 'EXERCISE').toUpperCase()
+      if (t === 'ARTICLE') updateArticle(a.id, payload).catch(() => {})
+      else if (t === 'EXERCISE') updateExercise(a.id, payload).catch(() => {})
       else updateQuiz(a.id, payload).catch(() => {})
     })
     showSnackbar('Kolejność aktywności zmieniona')
@@ -215,7 +230,8 @@ export default function LessonDetailPage() {
           items={activities}
           onReorder={handleReorderActivities}
           renderItem={(activity) => {
-            const config = typeConfig[activity.type]
+            const actType = (activity.type ?? 'EXERCISE').toUpperCase() as keyof typeof typeConfig
+            const config = typeConfig[actType] ?? typeConfig.ARTICLE
             const Icon = config.icon
             return (
               <Paper
@@ -234,7 +250,7 @@ export default function LessonDetailPage() {
                     cursor: 'pointer',
                     '&:hover': { bgcolor: 'action.hover' },
                   }}
-                  onClick={() => navigate(`/activities/${activity.type}/${activity.id}`)}
+                  onClick={() => navigate(`/activities/${(activity.type ?? 'exercise').toLowerCase()}/${activity.id}`)}
                 >
                   <Box
                     sx={{
@@ -267,9 +283,9 @@ export default function LessonDetailPage() {
                           color: config.color,
                         }}
                       />
-                      {activity.type === 'exercise' && 'difficulty' in activity && (
+                      {actType === 'EXERCISE' && 'difficulty' in activity && (
                         <Chip
-                          label={difficultyLabels[(activity as unknown as { difficulty: 'easy' | 'medium' | 'hard' }).difficulty]}
+                          label={difficultyLabels[(activity as unknown as { difficulty: string }).difficulty] ?? 'Łatwy'}
                           size="small"
                           variant="outlined"
                           sx={{ height: 22, fontSize: '0.7rem' }}
@@ -281,7 +297,7 @@ export default function LessonDetailPage() {
                         {activity.description}
                       </Typography>
                     )}
-                    {activity.type === 'article' && 'ref' in activity && (
+                    {actType === 'ARTICLE' && 'ref' in activity && (
                       <Typography
                         variant="caption"
                         color="primary"
