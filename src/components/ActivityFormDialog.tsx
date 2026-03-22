@@ -8,6 +8,8 @@ import Button from '@mui/material/Button'
 import MenuItem from '@mui/material/MenuItem'
 import type { Activity, ActivityType, ExerciseDifficulty } from '../types/api'
 import { createArticle, updateArticle, createExercise, updateExercise, createQuiz, updateQuiz } from '../api'
+import { useLanguage } from '../context/LanguageContext'
+import { useSnackbar } from '../context/SnackbarContext'
 
 interface ActivityFormDialogProps {
   open: boolean
@@ -19,6 +21,8 @@ interface ActivityFormDialogProps {
 }
 
 export default function ActivityFormDialog({ open, onClose, onSave, lessonId, activity, nextOrder }: ActivityFormDialogProps) {
+  const { t } = useLanguage()
+  const { showSnackbar } = useSnackbar()
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [order, setOrder] = useState(nextOrder)
@@ -73,7 +77,7 @@ export default function ActivityFormDialog({ open, onClose, onSave, lessonId, ac
       onSave(result)
       onClose()
     } catch {
-      // TODO: show error
+      showSnackbar(t('activity.saveError'), 'error')
     } finally {
       setSaving(false)
     }
@@ -81,25 +85,25 @@ export default function ActivityFormDialog({ open, onClose, onSave, lessonId, ac
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-      <DialogTitle>{isEdit ? 'Edytuj aktywność' : 'Nowa aktywność'}</DialogTitle>
+      <DialogTitle>{isEdit ? t('activity.editActivity') : t('activity.newActivity')}</DialogTitle>
       <DialogContent>
         <TextField
           select
           margin="dense"
-          label="Typ"
+          label={t('activity.type')}
           fullWidth
           value={type}
           onChange={(e) => setType(e.target.value as ActivityType)}
           disabled={isEdit}
         >
-          <MenuItem value="ARTICLE">Artykuł</MenuItem>
-          <MenuItem value="EXERCISE">Ćwiczenie</MenuItem>
-          <MenuItem value="QUIZ">Quiz</MenuItem>
+          <MenuItem value="ARTICLE">{t('activity.article')}</MenuItem>
+          <MenuItem value="EXERCISE">{t('activity.exercise')}</MenuItem>
+          <MenuItem value="QUIZ">{t('activity.quiz')}</MenuItem>
         </TextField>
         <TextField
           autoFocus
           margin="dense"
-          label="Nazwa"
+          label={t('crud.name')}
           fullWidth
           required
           value={name}
@@ -107,7 +111,7 @@ export default function ActivityFormDialog({ open, onClose, onSave, lessonId, ac
         />
         <TextField
           margin="dense"
-          label="Opis"
+          label={t('crud.description')}
           fullWidth
           multiline
           rows={3}
@@ -116,7 +120,7 @@ export default function ActivityFormDialog({ open, onClose, onSave, lessonId, ac
         />
         <TextField
           margin="dense"
-          label="Kolejność"
+          label={t('crud.order')}
           type="number"
           fullWidth
           value={order}
@@ -125,7 +129,7 @@ export default function ActivityFormDialog({ open, onClose, onSave, lessonId, ac
         {type === 'ARTICLE' && (
           <TextField
             margin="dense"
-            label="Link do artykułu"
+            label={t('activity.articleLink')}
             fullWidth
             required
             value={ref}
@@ -137,21 +141,21 @@ export default function ActivityFormDialog({ open, onClose, onSave, lessonId, ac
           <TextField
             select
             margin="dense"
-            label="Poziom trudności"
+            label={t('activity.difficulty')}
             fullWidth
             value={difficulty}
             onChange={(e) => setDifficulty(e.target.value as ExerciseDifficulty)}
           >
-            <MenuItem value="easy">Łatwy</MenuItem>
-            <MenuItem value="medium">Średni</MenuItem>
-            <MenuItem value="hard">Trudny</MenuItem>
+            <MenuItem value="easy">{t('activity.easy')}</MenuItem>
+            <MenuItem value="medium">{t('activity.medium')}</MenuItem>
+            <MenuItem value="hard">{t('activity.hard')}</MenuItem>
           </TextField>
         )}
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Anuluj</Button>
+        <Button onClick={onClose}>{t('crud.cancel')}</Button>
         <Button onClick={handleSubmit} variant="contained" disabled={saving || !name.trim()}>
-          {saving ? 'Zapisywanie...' : 'Zapisz'}
+          {saving ? t('crud.saving') : t('crud.save')}
         </Button>
       </DialogActions>
     </Dialog>

@@ -9,7 +9,8 @@ type TranslationKey = keyof typeof pl
 interface LanguageContextValue {
   language: Language
   setLanguage: (lang: Language) => void
-  t: (key: TranslationKey) => string
+  /** Podstawia `{nazwa}` w tekście wartościami z `params`, np. `t('quiz.progress', { current: 1, total: 5 })` */
+  t: (key: TranslationKey, params?: Record<string, string | number>) => string
 }
 
 const translations: Record<Language, Record<string, string>> = { pl, en }
@@ -17,7 +18,15 @@ const translations: Record<Language, Record<string, string>> = { pl, en }
 const LanguageContext = createContext<LanguageContextValue>({
   language: 'pl',
   setLanguage: () => {},
-  t: (key: string) => key,
+  t: (key: TranslationKey, params?: Record<string, string | number>) => {
+    let s = translations.pl[key] ?? key
+    if (params) {
+      for (const [k, v] of Object.entries(params)) {
+        s = s.replaceAll(`{${k}}`, String(v))
+      }
+    }
+    return s
+  },
 })
 
 export function useLanguage() {
@@ -36,8 +45,14 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const t = useCallback(
-    (key: TranslationKey) => {
-      return translations[language][key] ?? key
+    (key: TranslationKey, params?: Record<string, string | number>) => {
+      let s = translations[language][key] ?? key
+      if (params) {
+        for (const [k, v] of Object.entries(params)) {
+          s = s.replaceAll(`{${k}}`, String(v))
+        }
+      }
+      return s
     },
     [language],
   )

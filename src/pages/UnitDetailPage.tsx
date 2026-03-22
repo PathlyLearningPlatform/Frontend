@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
-import Button from '@mui/material/Button'
+// import Button from '@mui/material/Button' // przywróć wraz z przyciskami „Dodaj lekcję”
 import IconButton from '@mui/material/IconButton'
 import { DetailSkeleton } from '../components/PageSkeleton'
 import Alert from '@mui/material/Alert'
@@ -9,7 +9,7 @@ import Breadcrumbs from '@mui/material/Breadcrumbs'
 import Link from '@mui/material/Link'
 import Paper from '@mui/material/Paper'
 import Chip from '@mui/material/Chip'
-import AddIcon from '@mui/icons-material/Add'
+// import AddIcon from '@mui/icons-material/Add' // przywróć wraz z przyciskami „Dodaj lekcję”
 import EditIcon from '@mui/icons-material/Edit'
 import DeleteIcon from '@mui/icons-material/Delete'
 import MenuBookIcon from '@mui/icons-material/MenuBook'
@@ -164,6 +164,7 @@ export default function UnitDetailPage() {
       {/* Lessons list */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Typography variant="h5">Lekcje</Typography>
+        {/* Tymczasowo ukryte — tworzenie nowej lekcji z UI
         <Button
           variant="contained"
           size="small"
@@ -175,6 +176,7 @@ export default function UnitDetailPage() {
         >
           Dodaj lekcję
         </Button>
+        */}
       </Box>
 
       {lessons.length === 0 ? (
@@ -183,6 +185,10 @@ export default function UnitDetailPage() {
           <Typography variant="h6" color="text.secondary" gutterBottom>
             Brak lekcji
           </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            Brak lekcji w tym unicie.
+          </Typography>
+          {/* Tymczasowo ukryte — tworzenie nowej lekcji z UI
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
             Dodaj pierwszą lekcję do tego unita
           </Typography>
@@ -196,6 +202,7 @@ export default function UnitDetailPage() {
           >
             Dodaj lekcję
           </Button>
+          */}
         </Paper>
       ) : (
         <SortableList

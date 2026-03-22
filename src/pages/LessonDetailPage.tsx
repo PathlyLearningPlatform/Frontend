@@ -17,6 +17,8 @@ import FitnessCenterIcon from '@mui/icons-material/FitnessCenter'
 import QuizIcon from '@mui/icons-material/Quiz'
 import LibraryBooksIcon from '@mui/icons-material/LibraryBooks'
 import OpenInNewIcon from '@mui/icons-material/OpenInNew'
+import CheckCircleIcon from '@mui/icons-material/CheckCircle'
+import LinearProgress from '@mui/material/LinearProgress'
 import { useParams, useNavigate } from 'react-router-dom'
 import { getLesson, getUnit, getActivities, deleteActivity, updateArticle, updateExercise, updateQuiz } from '../api'
 import type { Lesson, Activity, Unit } from '../types/api'
@@ -24,26 +26,39 @@ import ConfirmDialog from '../components/ConfirmDialog'
 import ActivityFormDialog from '../components/ActivityFormDialog'
 import SortableList from '../components/SortableList'
 import { useSnackbar } from '../context/SnackbarContext'
+import { useLanguage } from '../context/LanguageContext'
+import {
+  getCompletedActivityIds,
+  lessonCompletionRatio,
+  subscribeLessonProgress,
+} from '../lib/activityProgress'
 
-const typeConfig = {
-  ARTICLE: { label: 'Artykuł', icon: ArticleIcon, color: '#2196F3' },
-  EXERCISE: { label: 'Ćwiczenie', icon: FitnessCenterIcon, color: '#FF9800' },
-  QUIZ: { label: 'Quiz', icon: QuizIcon, color: '#9C27B0' },
+const typeIcons = {
+  ARTICLE: { icon: ArticleIcon, color: '#2196F3' },
+  EXERCISE: { icon: FitnessCenterIcon, color: '#FF9800' },
+  QUIZ: { icon: QuizIcon, color: '#9C27B0' },
 } as const
 
-const difficultyLabels: Record<string, string> = {
-  EASY: 'Łatwy',
-  MEDIUM: 'Średni',
-  HARD: 'Trudny',
-  easy: 'Łatwy',
-  medium: 'Średni',
-  hard: 'Trudny',
-}
+const difficultyKeys = {
+  EASY: 'activity.easy',
+  MEDIUM: 'activity.medium',
+  HARD: 'activity.hard',
+  easy: 'activity.easy',
+  medium: 'activity.medium',
+  hard: 'activity.hard',
+} as const
+
+const typeLabelKeys = {
+  ARTICLE: 'activity.article',
+  EXERCISE: 'activity.exercise',
+  QUIZ: 'activity.quiz',
+} as const
 
 export default function LessonDetailPage() {
   const { lessonId } = useParams()
   const navigate = useNavigate()
   const { showSnackbar } = useSnackbar()
+  const { t } = useLanguage()
 
   const [lesson, setLesson] = useState<Lesson | null>(null)
   const [parentUnit, setParentUnit] = useState<Unit | null>(null)
@@ -54,6 +69,7 @@ export default function LessonDetailPage() {
   const [deleteActivityId, setDeleteActivityId] = useState<string | null>(null)
   const [activityDialogOpen, setActivityDialogOpen] = useState(false)
   const [editingActivity, setEditingActivity] = useState<Activity | undefined>(undefined)
+  const [completedIds, setCompletedIds] = useState<Set<string>>(() => new Set())
 
   // Persist activity types in sessionStorage (backend doesn't return type)
   const saveTypeCache = (acts: Activity[]) => {
@@ -85,7 +101,7 @@ export default function LessonDetailPage() {
         .sort((a, b) => a.order - b.order)
       setActivities(applyTypeCache(filtered))
     } catch {
-      setError('Nie udało się pobrać danych.')
+      setError(t('lesson.fetchError'))
     } finally {
       setLoading(false)
     }
@@ -95,6 +111,13 @@ export default function LessonDetailPage() {
     fetchData()
   }, [fetchData])
 
+  useEffect(() => {
+    if (!lessonId) return
+    const sync = () => setCompletedIds(getCompletedActivityIds(lessonId))
+    sync()
+    return subscribeLessonProgress(lessonId, sync)
+  }, [lessonId])
+
   const handleDeleteActivity = async () => {
     if (!deleteActivityId) return
     const removedId = deleteActivityId
@@ -102,9 +125,9 @@ export default function LessonDetailPage() {
     setDeleteActivityId(null)
     try {
       await deleteActivity(removedId)
-      showSnackbar('Aktywność usunięta')
+      showSnackbar(t('activity.deleted'))
     } catch {
-      setError('Nie udało się usunąć aktywności.')
+      setError(t('activity.deleteError'))
       fetchData()
     }
   }
@@ -115,10 +138,10 @@ export default function LessonDetailPage() {
       setActivities((prev) =>
         prev.map((a) => (a.id === activity.id ? activity : a)).sort((a, b) => a.order - b.order)
       )
-      showSnackbar('Aktywność zaktualizowana')
+      showSnackbar(t('activity.updated'))
     } else {
       setActivities((prev) => [...prev, activity].sort((a, b) => a.order - b.order))
-      showSnackbar('Aktywność dodana')
+      showSnackbar(t('activity.added'))
     }
   }
 
@@ -127,12 +150,12 @@ export default function LessonDetailPage() {
     setActivities(updated)
     updated.forEach((a) => {
       const payload = { order: a.order }
-      const t = (a.type ?? 'EXERCISE').toUpperCase()
-      if (t === 'ARTICLE') updateArticle(a.id, payload).catch(() => {})
-      else if (t === 'EXERCISE') updateExercise(a.id, payload).catch(() => {})
+      const actType = (a.type ?? 'EXERCISE').toUpperCase()
+      if (actType === 'ARTICLE') updateArticle(a.id, payload).catch(() => {})
+      else if (actType === 'EXERCISE') updateExercise(a.id, payload).catch(() => {})
       else updateQuiz(a.id, payload).catch(() => {})
     })
-    showSnackbar('Kolejność aktywności zmieniona')
+    showSnackbar(t('activity.reordered'))
   }
 
   if (loading) {
@@ -140,14 +163,14 @@ export default function LessonDetailPage() {
   }
 
   if (!lesson) {
-    return <Alert severity="error">Nie znaleziono lekcji.</Alert>
+    return <Alert severity="error">{t('lesson.notFound')}</Alert>
   }
 
   return (
     <>
       <Breadcrumbs sx={{ mb: 3 }}>
         <Link underline="hover" color="inherit" sx={{ cursor: 'pointer' }} onClick={() => navigate('/')}>
-          Pulpit
+          {t('nav.dashboard')}
         </Link>
         {parentUnit && (
           <Link underline="hover" color="inherit" sx={{ cursor: 'pointer' }} onClick={() => navigate(`/units/${parentUnit.id}`)}>
@@ -184,14 +207,32 @@ export default function LessonDetailPage() {
           </Typography>
         )}
         <Chip
-          label={`${activities.length} aktywności`}
+          label={`${activities.length} ${t('activity.count')}`}
           sx={{ mt: 2, bgcolor: 'rgba(255,255,255,0.2)', color: 'white' }}
         />
+        {activities.length > 0 && (
+          <Box sx={{ mt: 3, maxWidth: 480 }}>
+            <Typography variant="body2" sx={{ mb: 0.5, opacity: 0.95 }}>
+              {t('activity.lessonProgress')}: {completedIds.size}/{activities.length} (
+              {lessonCompletionRatio(lessonId!, activities.length)}%)
+            </Typography>
+            <LinearProgress
+              variant="determinate"
+              value={lessonCompletionRatio(lessonId!, activities.length)}
+              sx={{
+                height: 10,
+                borderRadius: 1,
+                bgcolor: 'rgba(255,255,255,0.25)',
+                '& .MuiLinearProgress-bar': { bgcolor: 'white' },
+              }}
+            />
+          </Box>
+        )}
       </Paper>
 
       {/* Activities list */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h5">Aktywności</Typography>
+        <Typography variant="h5">{t('activity.activities')}</Typography>
         <Button
           variant="contained"
           size="small"
@@ -201,7 +242,7 @@ export default function LessonDetailPage() {
             setActivityDialogOpen(true)
           }}
         >
-          Dodaj aktywność
+          {t('activity.addActivity')}
         </Button>
       </Box>
 
@@ -209,10 +250,10 @@ export default function LessonDetailPage() {
         <Paper sx={{ p: 6, textAlign: 'center' }}>
           <LibraryBooksIcon sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
           <Typography variant="h6" color="text.secondary" gutterBottom>
-            Brak aktywności
+            {t('activity.noActivities')}
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            Dodaj pierwszą aktywność do tej lekcji
+            {t('activity.addFirst')}
           </Typography>
           <Button
             variant="outlined"
@@ -222,7 +263,7 @@ export default function LessonDetailPage() {
               setActivityDialogOpen(true)
             }}
           >
-            Dodaj aktywność
+            {t('activity.addActivity')}
           </Button>
         </Paper>
       ) : (
@@ -230,8 +271,8 @@ export default function LessonDetailPage() {
           items={activities}
           onReorder={handleReorderActivities}
           renderItem={(activity) => {
-            const actType = (activity.type ?? 'EXERCISE').toUpperCase() as keyof typeof typeConfig
-            const config = typeConfig[actType] ?? typeConfig.ARTICLE
+            const actType = (activity.type ?? 'EXERCISE').toUpperCase() as keyof typeof typeIcons
+            const config = typeIcons[actType] ?? typeIcons.ARTICLE
             const Icon = config.icon
             return (
               <Paper
@@ -269,12 +310,22 @@ export default function LessonDetailPage() {
                     <Icon />
                   </Box>
                   <Box sx={{ flex: 1 }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5, flexWrap: 'wrap' }}>
                       <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
                         {activity.name}
                       </Typography>
+                      {lessonId && completedIds.has(activity.id) && (
+                        <Chip
+                          icon={<CheckCircleIcon sx={{ fontSize: '18px !important' }} />}
+                          label={t('activity.completed')}
+                          size="small"
+                          color="success"
+                          variant="outlined"
+                          sx={{ height: 24, fontSize: '0.7rem' }}
+                        />
+                      )}
                       <Chip
-                        label={config.label}
+                        label={t(typeLabelKeys[actType])}
                         size="small"
                         sx={{
                           height: 22,
@@ -285,7 +336,7 @@ export default function LessonDetailPage() {
                       />
                       {actType === 'EXERCISE' && 'difficulty' in activity && (
                         <Chip
-                          label={difficultyLabels[(activity as unknown as { difficulty: string }).difficulty] ?? 'Łatwy'}
+                          label={t(difficultyKeys[(activity as unknown as { difficulty: string }).difficulty as keyof typeof difficultyKeys] ?? 'activity.easy')}
                           size="small"
                           variant="outlined"
                           sx={{ height: 22, fontSize: '0.7rem' }}
@@ -340,8 +391,8 @@ export default function LessonDetailPage() {
       {/* Dialogs */}
       <ConfirmDialog
         open={deleteActivityId !== null}
-        title="Usuń aktywność"
-        message="Czy na pewno chcesz usunąć tę aktywność?"
+        title={t('delete.activity')}
+        message={t('delete.activityMessage')}
         onConfirm={handleDeleteActivity}
         onCancel={() => setDeleteActivityId(null)}
       />
@@ -351,7 +402,7 @@ export default function LessonDetailPage() {
         onSave={handleActivitySave}
         lessonId={lessonId!}
         activity={editingActivity}
-        nextOrder={activities.length + 1}
+        nextOrder={activities.length > 0 ? Math.max(...activities.map(a => a.order)) + 1 : 1}
       />
     </>
   )

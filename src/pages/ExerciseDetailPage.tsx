@@ -8,9 +8,14 @@ import Link from '@mui/material/Link'
 import Paper from '@mui/material/Paper'
 import Chip from '@mui/material/Chip'
 import FitnessCenterIcon from '@mui/icons-material/FitnessCenter'
+import Button from '@mui/material/Button'
+import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import { useParams, useNavigate } from 'react-router-dom'
 import { getActivity, getLesson } from '../api'
 import type { Activity, Lesson } from '../types/api'
+import { useLanguage } from '../context/LanguageContext'
+import { useSnackbar } from '../context/SnackbarContext'
+import { isActivityCompleted, markActivityCompleted } from '../lib/activityProgress'
 
 const difficultyConfig: Record<string, { label: string; color: string }> = {
   EASY: { label: 'Łatwy', color: '#4CAF50' },
@@ -24,8 +29,11 @@ const difficultyConfig: Record<string, { label: string; color: string }> = {
 export default function ExerciseDetailPage() {
   const { activityId } = useParams()
   const navigate = useNavigate()
+  const { t } = useLanguage()
+  const { showSnackbar } = useSnackbar()
 
   const [exercise, setExercise] = useState<Activity | null>(null)
+  const [completed, setCompleted] = useState(false)
   const [parentLesson, setParentLesson] = useState<Lesson | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -36,6 +44,7 @@ export default function ExerciseDetailPage() {
     try {
       const data = await getActivity(activityId)
       setExercise(data.activity)
+      setCompleted(isActivityCompleted(data.activity.lessonId, data.activity.id))
       try {
         const lessonData = await getLesson(data.activity.lessonId)
         setParentLesson(lessonData.lesson)
@@ -115,6 +124,25 @@ export default function ExerciseDetailPage() {
                 fontSize: '0.9rem',
               }}
             />
+          </Box>
+          <Box sx={{ mt: 3 }}>
+            {completed ? (
+              <Chip icon={<CheckCircleIcon />} label={t('activity.alreadyCompleted')} color="success" variant="outlined" />
+            ) : (
+              <Button
+                variant="outlined"
+                color="success"
+                startIcon={<CheckCircleIcon />}
+                onClick={() => {
+                  if (!exercise) return
+                  markActivityCompleted(exercise.lessonId, exercise.id)
+                  setCompleted(true)
+                  showSnackbar(t('activity.progressSaved'))
+                }}
+              >
+                {t('activity.markComplete')}
+              </Button>
+            )}
           </Box>
         </Paper>
       )}

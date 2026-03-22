@@ -13,12 +13,19 @@ import OpenInNewIcon from '@mui/icons-material/OpenInNew'
 import { useParams, useNavigate } from 'react-router-dom'
 import { getActivity, getLesson } from '../api'
 import type { Activity, Lesson } from '../types/api'
+import { useLanguage } from '../context/LanguageContext'
+import { useSnackbar } from '../context/SnackbarContext'
+import { isActivityCompleted, markActivityCompleted } from '../lib/activityProgress'
+import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 
 export default function ArticleDetailPage() {
   const { activityId } = useParams()
   const navigate = useNavigate()
+  const { t } = useLanguage()
+  const { showSnackbar } = useSnackbar()
 
   const [article, setArticle] = useState<Activity | null>(null)
+  const [completed, setCompleted] = useState(false)
   const [parentLesson, setParentLesson] = useState<Lesson | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -29,6 +36,7 @@ export default function ArticleDetailPage() {
     try {
       const data = await getActivity(activityId)
       setArticle(data.activity)
+      setCompleted(isActivityCompleted(data.activity.lessonId, data.activity.id))
       try {
         const lessonData = await getLesson(data.activity.lessonId)
         setParentLesson(lessonData.lesson)
@@ -110,6 +118,25 @@ export default function ArticleDetailPage() {
           >
             Otwórz materiał
           </Button>
+          <Box sx={{ mt: 2 }}>
+            {completed ? (
+              <Chip icon={<CheckCircleIcon />} label={t('activity.alreadyCompleted')} color="success" variant="outlined" />
+            ) : (
+              <Button
+                variant="outlined"
+                color="success"
+                startIcon={<CheckCircleIcon />}
+                onClick={() => {
+                  if (!article) return
+                  markActivityCompleted(article.lessonId, article.id)
+                  setCompleted(true)
+                  showSnackbar(t('activity.progressSaved'))
+                }}
+              >
+                {t('activity.markComplete')}
+              </Button>
+            )}
+          </Box>
         </Paper>
       )}
     </>
