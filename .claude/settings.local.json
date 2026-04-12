@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx tsc:*)",
+      "Bash(npx vite build:*)",
+      "Bash(curl:*)",
+      "Bash(gh api:*)",
+      "Bash(where:*)",
+      "Bash(where.exe:*)",
+      "Bash(dir:*)",
+      "Bash(dir \"C:\\\\Program Files \\(x86\\)\\\\GitHub CLI\")",
+      "Bash(powershell -Command:*)",
+      "WebFetch(domain:api.github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:github.com)",
+      "Bash(docker compose:*)",
+      "Bash(npm install:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(npm run dev:*)",
+      "Bash(cmd /c dir:*)",
+      "Bash(python3:*)"
+    ]
+  }
+}

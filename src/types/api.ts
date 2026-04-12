@@ -192,3 +192,22 @@ export interface UpdateQuestion {
   content?: string
   correctAnswer?: string
 }
+
+export interface LearningPathProgress {
+  id: string
+  learningPathId: string
+  userId: string
+  completedAt: string | null
+  totalSectionCount: number
+  completedSectionCount: number
+}
+
+export interface LessonProgress {
+  id: string
+  lessonId: string
+  unitId: string
+  userId: string
+  completedAt: string | null
+  totalActivityCount: number
+  completedActivityCount: number
+}

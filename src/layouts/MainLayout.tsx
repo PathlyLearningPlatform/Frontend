@@ -139,7 +139,7 @@ export default function MainLayout() {
       <Divider sx={{ mx: 2, opacity: 0.3 }} />
 
       {/* New path button */}
-      <Box sx={{ px: 2, pt: 2.5, pb: 1 }}>
+      {/*<Box sx={{ px: 2, pt: 2.5, pb: 1 }}>
         <ListItemButton
           sx={{
             borderRadius: 2.5,
@@ -162,7 +162,7 @@ export default function MainLayout() {
           </ListItemIcon>
           <ListItemText primary={t('nav.newPath')} primaryTypographyProps={{ fontWeight: 700 }} />
         </ListItemButton>
-      </Box>
+      </Box>*/}
 
       {/* Section label */}
       <Typography
