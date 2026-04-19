@@ -44,44 +44,44 @@ export default function ActivityFormDialog({ open, onClose, onSave, lessonId, ac
     }
   }, [open, activity, nextOrder])
 
-  const handleSubmit = async () => {
-    if (!name.trim()) return
-    setSaving(true)
-    try {
-      let result: Activity
-      if (type === 'ARTICLE') {
-        if (isEdit && activity) {
-          const data = await updateArticle(activity.id, { name: name.trim(), description: description.trim() || undefined, order, ref: ref.trim() || undefined })
-          result = { ...data.article, type: 'ARTICLE' }
-        } else {
-          const data = await createArticle({ name: name.trim(), description: description.trim() || undefined, order, lessonId, ref: ref.trim() })
-          result = { ...data.article, type: 'ARTICLE' }
-        }
-      } else if (type === 'EXERCISE') {
-        if (isEdit && activity) {
-          const data = await updateExercise(activity.id, { name: name.trim(), description: description.trim() || undefined, order, difficulty })
-          result = { ...data.exercise, type: 'EXERCISE' }
-        } else {
-          const data = await createExercise({ name: name.trim(), description: description.trim() || undefined, order, lessonId, difficulty })
-          result = { ...data.exercise, type: 'EXERCISE' }
-        }
+const handleSubmit = async () => {
+  if (!name.trim()) return
+  setSaving(true)
+  try {
+    let result: Activity
+    if (type === 'ARTICLE') {
+      if (isEdit && activity) {
+        const data = await updateArticle(activity.id, { name: name.trim(), description: description.trim() || undefined, ref: ref.trim() || undefined })
+        result = { ...data.article, type: 'ARTICLE' }
       } else {
-        if (isEdit && activity) {
-          const data = await updateQuiz(activity.id, { name: name.trim(), description: description.trim() || undefined, order })
-          result = { ...data.quiz, type: 'QUIZ' }
-        } else {
-          const data = await createQuiz({ name: name.trim(), description: description.trim() || undefined, order, lessonId })
-          result = { ...data.quiz, type: 'QUIZ' }
-        }
+        const data = await createArticle({ name: name.trim(), description: description.trim() || undefined, lessonId, ref: ref.trim() })
+        result = { ...data.article, type: 'ARTICLE' }
       }
-      onSave(result)
-      onClose()
-    } catch {
-      showSnackbar(t('activity.saveError'), 'error')
-    } finally {
-      setSaving(false)
+    } else if (type === 'EXERCISE') {
+      if (isEdit && activity) {
+        const data = await updateExercise(activity.id, { name: name.trim(), description: description.trim() || undefined, difficulty })
+        result = { ...data.exercise, type: 'EXERCISE' }
+      } else {
+        const data = await createExercise({ name: name.trim(), description: description.trim() || undefined, lessonId, difficulty })
+        result = { ...data.exercise, type: 'EXERCISE' }
+      }
+    } else {
+      if (isEdit && activity) {
+        const data = await updateQuiz(activity.id, { name: name.trim(), description: description.trim() || undefined })
+        result = { ...data.quiz, type: 'QUIZ' }
+      } else {
+        const data = await createQuiz({ name: name.trim(), description: description.trim() || undefined, lessonId })
+        result = { ...data.quiz, type: 'QUIZ' }
+      }
     }
+    onSave(result)
+    onClose()
+  } catch {
+    showSnackbar(t('activity.saveError'), 'error')
+  } finally {
+    setSaving(false)
   }
+}
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
@@ -154,7 +154,7 @@ export default function ActivityFormDialog({ open, onClose, onSave, lessonId, ac
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>{t('crud.cancel')}</Button>
-        <Button onClick={handleSubmit} variant="contained" disabled={saving || !name.trim()}>
+        <Button onClick={handleSubmit} variant="contained" disabled={saving || !name.trim() || (type === 'ARTICLE' && !ref.trim())}>
           {saving ? t('crud.saving') : t('crud.save')}
         </Button>
       </DialogActions>

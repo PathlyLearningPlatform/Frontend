@@ -62,6 +62,8 @@ export default function LessonDetailPage() {
 
   const [lesson, setLesson] = useState<Lesson | null>(null)
   const [parentUnit, setParentUnit] = useState<Unit | null>(null)
+  const [parentSection, setParentSection] = useState<any>(null)
+  const [parentPath, setParentPath] = useState<any>(null)
   const [activities, setActivities] = useState<Activity[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -95,6 +97,11 @@ export default function LessonDetailPage() {
       try {
         const unitData = await getUnit(lessonData.lesson.unitId)
         setParentUnit(unitData.unit)
+        const { getSection, getLearningPath } = await import('../api')
+        const sectionData = await getSection(unitData.unit.sectionId)
+        setParentSection(sectionData.section)
+        const pathData = await getLearningPath(sectionData.section.learningPathId)
+        setParentPath(pathData.path)
       } catch { /* breadcrumbs fallback */ }
       const filtered = activitiesData.activities
         .filter((a) => a.lessonId === lessonId)
@@ -172,6 +179,16 @@ export default function LessonDetailPage() {
         <Link underline="hover" color="inherit" sx={{ cursor: 'pointer' }} onClick={() => navigate('/')}>
           {t('nav.dashboard')}
         </Link>
+        {parentPath && (
+          <Link underline="hover" color="inherit" sx={{ cursor: 'pointer' }} onClick={() => navigate(`/learning-paths/${parentPath.id}`)}>
+            {parentPath.name}
+          </Link>
+        )}
+        {parentSection && parentPath && (
+          <Link underline="hover" color="inherit" sx={{ cursor: 'pointer' }} onClick={() => navigate(`/learning-paths/${parentPath.id}`)}>
+            {parentSection.name}
+          </Link>
+        )}
         {parentUnit && (
           <Link underline="hover" color="inherit" sx={{ cursor: 'pointer' }} onClick={() => navigate(`/units/${parentUnit.id}`)}>
             {parentUnit.name}
@@ -402,7 +419,7 @@ export default function LessonDetailPage() {
         onSave={handleActivitySave}
         lessonId={lessonId!}
         activity={editingActivity}
-        nextOrder={activities.length > 0 ? Math.max(...activities.map(a => a.order)) + 1 : 1}
+        nextOrder={activities.length + 1}
       />
     </>
   )
