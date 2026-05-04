@@ -14,6 +14,8 @@ import QuizDetailPage from './pages/QuizDetailPage'
 import ArticleDetailPage from './pages/ArticleDetailPage'
 import ExerciseDetailPage from './pages/ExerciseDetailPage'
 import NotFoundPage from './pages/NotFoundPage'
+import ProjectsPage from './pages/ProjectsPage'
+import SkillsPage from './pages/SkillsPage'
 
 function App() {
   return (
@@ -24,6 +26,8 @@ function App() {
           <Route path="/explore" element={<ExplorePage />} />
           <Route path="/my-paths" element={<MyPathsPage />} />
           <Route path="/progress" element={<ProgressPage />} />
+          <Route path="/skills" element={<SkillsPage />} />
+          <Route path="/projects" element={<ProjectsPage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/learning-paths/new" element={<LearningPathFormPage />} />

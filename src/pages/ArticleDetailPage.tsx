@@ -11,7 +11,7 @@ import Chip from '@mui/material/Chip'
 import ArticleIcon from '@mui/icons-material/Article'
 import OpenInNewIcon from '@mui/icons-material/OpenInNew'
 import { useParams, useNavigate } from 'react-router-dom'
-import { getActivity, getLesson } from '../api'
+import { getActivity, getLesson, completeActivity } from '../api'
 import type { Activity, Lesson } from '../types/api'
 import { useLanguage } from '../context/LanguageContext'
 import { useSnackbar } from '../context/SnackbarContext'
@@ -126,11 +126,16 @@ export default function ArticleDetailPage() {
                 variant="outlined"
                 color="success"
                 startIcon={<CheckCircleIcon />}
-                onClick={() => {
+                onClick={async () => {
                   if (!article) return
-                  markActivityCompleted(article.lessonId, article.id)
-                  setCompleted(true)
-                  showSnackbar(t('activity.progressSaved'))
+                  try {
+                    await completeActivity(article.id)
+                    markActivityCompleted(article.lessonId, article.id)
+                    setCompleted(true)
+                    showSnackbar(t('activity.progressSaved'))
+                  } catch {
+                    showSnackbar('Nie udało się zapisać postępu', 'error')
+                  }
                 }}
               >
                 {t('activity.markComplete')}

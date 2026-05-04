@@ -27,6 +27,8 @@ import {
   getUnits,
   deleteUnit,
   updateUnit,
+  startLearningPath,
+  getLearningPathsProgress,
 } from '../api'
 import type { LearningPath, Section, Unit } from '../types/api'
 import ConfirmDialog from '../components/ConfirmDialog'
@@ -49,7 +51,8 @@ export default function LearningPathDetailPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set())
-
+  const [progress, setProgress] = useState<{ completedSectionCount: number; totalSectionCount: number } | null>(null)
+  const [starting, setStarting] = useState(false)
   // Dialogs
   const [deletePathOpen, setDeletePathOpen] = useState(false)
   const [deleteSectionId, setDeleteSectionId] = useState<string | null>(null)
@@ -84,6 +87,12 @@ export default function LearningPathDetailPage() {
           .sort((a, b) => a.order - b.order)
       }
       setUnitsBySection(grouped)
+
+      try {
+        const progressRes = await getLearningPathsProgress()
+        const myProgress = progressRes.learningPathProgress.find(p => p.learningPathId === id)
+        setProgress(myProgress ?? null)
+      } catch { /* ignore */ }
 
       // Expand first section by default
       if (filteredSections.length > 0) {
@@ -259,7 +268,7 @@ export default function LearningPathDetailPage() {
         <Box sx={{ position: 'absolute', width: 100, height: 100, borderRadius: '50%', bgcolor: 'rgba(255,255,255,0.06)', bottom: -30, right: 80 }} />
         <Box sx={{ position: 'absolute', width: 60, height: 60, borderRadius: '50%', bgcolor: 'rgba(255,255,255,0.07)', top: 20, right: 180 }} />
         <Box sx={{ position: 'relative', zIndex: 1 }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
             <Box sx={{ flex: 1 }}>
               <Typography variant="h4" sx={{ fontWeight: 800, mb: 1, letterSpacing: '-0.02em' }}>
                 {path.name}
@@ -270,64 +279,59 @@ export default function LearningPathDetailPage() {
                 </Typography>
               )}
               <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-                <Chip
-                  label={`${sections.length} sekcji`}
-                  sx={{ bgcolor: 'rgba(255,255,255,0.18)', color: 'white', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.25)' }}
-                />
-                <Chip
-                  label={`${totalUnits} unitów`}
-                  sx={{ bgcolor: 'rgba(255,255,255,0.18)', color: 'white', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.25)' }}
-                />
+                <Chip label={`${sections.length} sekcji`} sx={{ bgcolor: 'rgba(255,255,255,0.18)', color: 'white', border: '1px solid rgba(255,255,255,0.25)' }} />
+                <Chip label={`${totalUnits} unitów`} sx={{ bgcolor: 'rgba(255,255,255,0.18)', color: 'white', border: '1px solid rgba(255,255,255,0.25)' }} />
               </Box>
             </Box>
             <Box sx={{ display: 'flex', gap: 1 }}>
-              <motion.div whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.9 }}>
-                <IconButton
-                  sx={{
-                    color: 'white',
-                    bgcolor: 'rgba(255,255,255,0.15)',
-                    backdropFilter: 'blur(8px)',
-                    border: '1px solid rgba(255,255,255,0.25)',
-                    '&:hover': { bgcolor: 'rgba(255,255,255,0.3)' },
-                  }}
-                  onClick={() => navigate(`/learning-paths/${id}/edit`)}
-                >
-                  <EditIcon />
-                </IconButton>
-              </motion.div>
-              <motion.div whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.9 }}>
-                <IconButton
-                  sx={{
-                    color: 'white',
-                    bgcolor: 'rgba(255,255,255,0.15)',
-                    backdropFilter: 'blur(8px)',
-                    border: '1px solid rgba(255,255,255,0.25)',
-                    '&:hover': { bgcolor: 'rgba(255,255,255,0.3)' },
-                  }}
-                  onClick={() => setDeletePathOpen(true)}
-                >
-                  <DeleteIcon />
-                </IconButton>
-              </motion.div>
+              <IconButton sx={{ color: 'white', bgcolor: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.25)', '&:hover': { bgcolor: 'rgba(255,255,255,0.3)' } }} onClick={() => navigate(`/learning-paths/${id}/edit`)}>
+                <EditIcon />
+              </IconButton>
+              <IconButton sx={{ color: 'white', bgcolor: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.25)', '&:hover': { bgcolor: 'rgba(255,255,255,0.3)' } }} onClick={() => setDeletePathOpen(true)}>
+                <DeleteIcon />
+              </IconButton>
             </Box>
-          </Box>
-
-          {/* Progress bar */}
+          </Box>  
           <Box sx={{ mt: 3 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
               <Typography variant="body2" sx={{ opacity: 0.8 }}>Postęp</Typography>
-              <Typography variant="body2" sx={{ opacity: 0.8 }}>0%</Typography>
+              <Typography variant="body2" sx={{ opacity: 0.8 }}>
+                {progress ? `${Math.round((progress.completedSectionCount / (progress.totalSectionCount || 1)) * 100)}%` : '0%'}
+              </Typography>
             </Box>
             <LinearProgress
               variant="determinate"
-              value={0}
-              sx={{
-                height: 8,
-                borderRadius: 4,
-                bgcolor: 'rgba(255,255,255,0.2)',
-                '& .MuiLinearProgress-bar': { bgcolor: 'white' },
-              }}
+              value={progress ? Math.round((progress.completedSectionCount / (progress.totalSectionCount || 1)) * 100) : 0}
+              sx={{ height: 8, borderRadius: 4, bgcolor: 'rgba(255,255,255,0.2)', '& .MuiLinearProgress-bar': { bgcolor: 'white' } }}
             />
+            {!progress && (
+              <Button
+                variant="contained"
+                size="large"
+                disabled={starting}
+                onClick={async () => {
+                  setStarting(true)
+                  try {
+                    await startLearningPath(id!)
+                    const progressRes = await getLearningPathsProgress()
+                    const myProgress = progressRes.learningPathProgress.find(p => p.learningPathId === id)
+                    setProgress(myProgress ?? null)
+                  } catch { /* ignore */ } finally {
+                    setStarting(false)
+                  }
+                }}
+                sx={{
+                  mt: 2,
+                  bgcolor: 'white',
+                  color: '#6C63FF',
+                  fontWeight: 700,
+                  px: 4,
+                  '&:hover': { bgcolor: 'rgba(255,255,255,0.9)' }
+                }}
+              >
+                {starting ? 'Startowanie...' : '▶ Rozpocznij naukę'}
+              </Button>
+            )}
           </Box>
         </Box>
       </MotionPaper>

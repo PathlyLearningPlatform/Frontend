@@ -24,7 +24,7 @@ import QuizIcon from '@mui/icons-material/Quiz'
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import CancelIcon from '@mui/icons-material/Cancel'
 import { useParams, useNavigate } from 'react-router-dom'
-import { getActivity, getLesson, getQuestions, createQuestion, updateQuestion, deleteQuestion } from '../api'
+import { getActivity, getLesson, getQuestions, createQuestion, updateQuestion, deleteQuestion, completeActivity } from '../api'
 import type { Activity, Lesson, Question } from '../types/api'
 import ConfirmDialog from '../components/ConfirmDialog'
 import { useSnackbar } from '../context/SnackbarContext'
@@ -160,12 +160,17 @@ export default function QuizDetailPage() {
     if (ok) setCorrectCount((c) => c + 1)
   }
 
-  const handleNextQuestion = () => {
+  const handleNextQuestion = async () => {
     if (solveIndex >= questions.length - 1) {
       setSolveFinished(true)
       if (quiz) {
-        markActivityCompleted(quiz.lessonId, quiz.id)
-        showSnackbar(t('quiz.markedComplete'))
+        try {
+          await completeActivity(quiz.id)
+          markActivityCompleted(quiz.lessonId, quiz.id)
+          showSnackbar(t('quiz.markedComplete'))
+        } catch {
+          showSnackbar('Nie udało się zapisać postępu', 'error')
+        }
       }
       return
     }

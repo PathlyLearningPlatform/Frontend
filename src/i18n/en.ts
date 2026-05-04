@@ -6,6 +6,8 @@ const en: Record<string, string> = {
   'nav.progress': 'My progress',
   'nav.profile': 'Profile',
   'nav.settings': 'Settings',
+  'nav.projects': 'Projects',
+  'nav.skills': 'Skills',
   'nav.newPath': 'New path',
   'nav.menu': 'Menu',
   'nav.account': 'Account',

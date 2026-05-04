@@ -11,7 +11,7 @@ import FitnessCenterIcon from '@mui/icons-material/FitnessCenter'
 import Button from '@mui/material/Button'
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import { useParams, useNavigate } from 'react-router-dom'
-import { getActivity, getLesson } from '../api'
+import { getActivity, getLesson, completeActivity } from '../api'
 import type { Activity, Lesson } from '../types/api'
 import { useLanguage } from '../context/LanguageContext'
 import { useSnackbar } from '../context/SnackbarContext'
@@ -133,11 +133,16 @@ export default function ExerciseDetailPage() {
                 variant="outlined"
                 color="success"
                 startIcon={<CheckCircleIcon />}
-                onClick={() => {
+                onClick={async () => {
                   if (!exercise) return
-                  markActivityCompleted(exercise.lessonId, exercise.id)
-                  setCompleted(true)
-                  showSnackbar(t('activity.progressSaved'))
+                  try {
+                    await completeActivity(exercise.id)
+                    markActivityCompleted(exercise.lessonId, exercise.id)
+                    setCompleted(true)
+                    showSnackbar(t('activity.progressSaved'))
+                  } catch {
+                    showSnackbar('Nie udało się zapisać postępu', 'error')
+                  }
                 }}
               >
                 {t('activity.markComplete')}
