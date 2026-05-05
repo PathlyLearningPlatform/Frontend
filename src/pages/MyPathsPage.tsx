@@ -8,7 +8,6 @@ import LinearProgress from '@mui/material/LinearProgress'
 import Alert from '@mui/material/Alert'
 import SchoolIcon from '@mui/icons-material/School'
 import RouteIcon from '@mui/icons-material/Route'
-import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline'
 import { useNavigate } from 'react-router-dom'
 import { useLanguage } from '../context/LanguageContext'
 import { getLearningPathsProgress, getLearningPaths } from '../api'
@@ -50,23 +49,6 @@ export default function MyPathsPage() {
         <Typography variant="h4">
           {t('myPaths.title')}
         </Typography>
-        <Button
-          variant="contained"
-          startIcon={<AddCircleOutlineIcon />}
-          onClick={() => navigate('/learning-paths/new')}
-          sx={{
-            borderRadius: 2.5,
-            background: 'linear-gradient(135deg, #6C63FF 0%, #9590FF 100%)',
-            boxShadow: '0 4px 20px rgba(108, 99, 255, 0.4)',
-            fontWeight: 700,
-            '&:hover': {
-              background: 'linear-gradient(135deg, #5B53EE 0%, #8480EE 100%)',
-              boxShadow: '0 8px 28px rgba(108, 99, 255, 0.5)',
-            },
-          }}
-        >
-          {t('nav.newPath')}
-        </Button>
       </Box>
 
       <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>

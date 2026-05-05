@@ -283,14 +283,7 @@ export default function LearningPathDetailPage() {
                 <Chip label={`${totalUnits} unitów`} sx={{ bgcolor: 'rgba(255,255,255,0.18)', color: 'white', border: '1px solid rgba(255,255,255,0.25)' }} />
               </Box>
             </Box>
-            <Box sx={{ display: 'flex', gap: 1 }}>
-              <IconButton sx={{ color: 'white', bgcolor: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.25)', '&:hover': { bgcolor: 'rgba(255,255,255,0.3)' } }} onClick={() => navigate(`/learning-paths/${id}/edit`)}>
-                <EditIcon />
-              </IconButton>
-              <IconButton sx={{ color: 'white', bgcolor: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.25)', '&:hover': { bgcolor: 'rgba(255,255,255,0.3)' } }} onClick={() => setDeletePathOpen(true)}>
-                <DeleteIcon />
-              </IconButton>
-            </Box>
+            
           </Box>  
           <Box sx={{ mt: 3 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>

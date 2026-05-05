@@ -7,7 +7,6 @@ import ProgressPage from './pages/ProgressPage'
 import ProfilePage from './pages/ProfilePage'
 import SettingsPage from './pages/SettingsPage'
 import LearningPathDetailPage from './pages/LearningPathDetailPage'
-import LearningPathFormPage from './pages/LearningPathFormPage'
 import UnitDetailPage from './pages/UnitDetailPage'
 import LessonDetailPage from './pages/LessonDetailPage'
 import QuizDetailPage from './pages/QuizDetailPage'
@@ -30,9 +29,7 @@ function App() {
           <Route path="/projects" element={<ProjectsPage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/settings" element={<SettingsPage />} />
-          <Route path="/learning-paths/new" element={<LearningPathFormPage />} />
           <Route path="/learning-paths/:id" element={<LearningPathDetailPage />} />
-          <Route path="/learning-paths/:id/edit" element={<LearningPathFormPage />} />
           <Route path="/units/:unitId" element={<UnitDetailPage />} />
           <Route path="/lessons/:lessonId" element={<LessonDetailPage />} />
           <Route path="/activities/quiz/:activityId" element={<QuizDetailPage />} />

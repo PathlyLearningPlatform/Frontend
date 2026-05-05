@@ -16,11 +16,8 @@ import Button from '@mui/material/Button'
 import MenuIcon from '@mui/icons-material/Menu'
 import HomeIcon from '@mui/icons-material/Home'
 import RouteIcon from '@mui/icons-material/Route'
-import SchoolIcon from '@mui/icons-material/School'
-import TrendingUpIcon from '@mui/icons-material/TrendingUp'
 import PersonIcon from '@mui/icons-material/Person'
 import SettingsIcon from '@mui/icons-material/Settings'
-import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline'
 import DarkModeIcon from '@mui/icons-material/DarkMode'
 import LightModeIcon from '@mui/icons-material/LightMode'
 import LoginIcon from '@mui/icons-material/Login'
@@ -38,8 +35,6 @@ const DRAWER_WIDTH = 270
 const mainMenuKeys = [
   { key: 'nav.dashboard' as const, icon: <HomeIcon />, path: '/' },
   { key: 'nav.explore' as const, icon: <RouteIcon />, path: '/explore' },
-  { key: 'nav.myPaths' as const, icon: <SchoolIcon />, path: '/my-paths' },
-  { key: 'nav.progress' as const, icon: <TrendingUpIcon />, path: '/progress' },
   { key: 'nav.skills' as const, icon: <AccountTreeIcon />, path: '/skills' },
   { key: 'nav.projects' as const, icon: <FolderIcon />, path: '/projects' },
 ]
@@ -119,7 +114,6 @@ export default function MainLayout() {
             '&:hover': { transform: 'rotate(-8deg) scale(1.1)' },
           }}
         >
-          <SchoolIcon sx={{ color: 'white', fontSize: 24 }} />
         </Box>
         <Box>
           <Typography
