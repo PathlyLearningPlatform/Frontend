@@ -92,11 +92,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setLoading(false)
       })
 
-    // Token refresh
+// Token refresh
     const interval = setInterval(() => {
       if (keycloak.authenticated) {
         keycloak
-          .updateToken(60)
+          .updateToken(300)
           .then((refreshed) => {
             if (refreshed) {
               const refreshedToken = keycloak.token ?? null
@@ -105,10 +105,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             }
           })
           .catch(() => {
-            console.warn('Token refresh failed')
+            console.warn('Token refresh failed, re-initializing...')
+            keycloak.login({ redirectUri: window.location.origin + '/' })
           })
       }
-    }, TOKEN_REFRESH_INTERVAL)
+    }, 60 * 1000)
 
     return () => clearInterval(interval)
   }, [updateUserFromToken])

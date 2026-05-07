@@ -17,12 +17,17 @@ import { useLanguage } from '../context/LanguageContext'
 import { useSnackbar } from '../context/SnackbarContext'
 import { isActivityCompleted, markActivityCompleted } from '../lib/activityProgress'
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
+import { useActivityNavigation } from '../hooks/useActivityNavigation' 
+import ActivityNavBar from '../components/ActivityNavBar'                
 
 export default function ArticleDetailPage() {
   const { activityId } = useParams()
   const navigate = useNavigate()
   const { t } = useLanguage()
   const { showSnackbar } = useSnackbar()
+
+  const { currentIndex, totalCount, hasPrev, hasNext, isLast, goNext, goPrev, goToLesson } =
+    useActivityNavigation(activityId)
 
   const [article, setArticle] = useState<Activity | null>(null)
   const [completed, setCompleted] = useState(false)
@@ -48,14 +53,24 @@ export default function ArticleDetailPage() {
     }
   }, [activityId])
 
-  useEffect(() => {
-    fetchData()
-  }, [fetchData])
+  useEffect(() => { fetchData() }, [fetchData])
 
   if (loading) return <DetailSkeleton />
   if (!article) return <Alert severity="error">Nie znaleziono artykułu.</Alert>
 
   const ref = 'ref' in article ? (article as unknown as { ref: string }).ref : null
+
+  const handleComplete = async () => {
+    if (!article) return
+    try {
+      await completeActivity(article.id)
+      markActivityCompleted(article.lessonId, article.id)
+      setCompleted(true)
+      showSnackbar(t('activity.progressSaved'))
+    } catch {
+      showSnackbar('Nie udało się zapisać postępu', 'error')
+    }
+  }
 
   return (
     <>
@@ -64,7 +79,7 @@ export default function ArticleDetailPage() {
           Pulpit
         </Link>
         {parentLesson && (
-          <Link underline="hover" color="inherit" sx={{ cursor: 'pointer' }} onClick={() => navigate(`/lessons/${parentLesson.id}`)}>
+          <Link underline="hover" color="inherit" sx={{ cursor: 'pointer' }} onClick={goToLesson}>
             {parentLesson.name}
           </Link>
         )}
@@ -77,19 +92,10 @@ export default function ArticleDetailPage() {
         </Alert>
       )}
 
-      <Paper
-        sx={{
-          p: 4,
-          mb: 4,
-          background: 'linear-gradient(135deg, #2196F3 0%, #64B5F6 100%)',
-          color: 'white',
-        }}
-      >
+      <Paper sx={{ p: 4, mb: 4, background: 'linear-gradient(135deg, #2196F3 0%, #64B5F6 100%)', color: 'white' }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
           <ArticleIcon sx={{ fontSize: 32 }} />
-          <Typography variant="h4" sx={{ fontWeight: 700 }}>
-            {article.name}
-          </Typography>
+          <Typography variant="h4" sx={{ fontWeight: 700 }}>{article.name}</Typography>
           <Chip label="Artykuł" sx={{ bgcolor: 'rgba(255,255,255,0.2)', color: 'white' }} />
         </Box>
         {article.description && (
@@ -100,7 +106,7 @@ export default function ArticleDetailPage() {
       </Paper>
 
       {ref && (
-        <Paper sx={{ p: 4 }}>
+        <Paper sx={{ p: 4, mb: 2 }}>
           <Typography variant="h6" sx={{ mb: 2 }}>Materiał</Typography>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <OpenInNewIcon color="primary" />
@@ -118,32 +124,38 @@ export default function ArticleDetailPage() {
           >
             Otwórz materiał
           </Button>
-          <Box sx={{ mt: 2 }}>
-            {completed ? (
-              <Chip icon={<CheckCircleIcon />} label={t('activity.alreadyCompleted')} color="success" variant="outlined" />
-            ) : (
-              <Button
-                variant="outlined"
-                color="success"
-                startIcon={<CheckCircleIcon />}
-                onClick={async () => {
-                  if (!article) return
-                  try {
-                    await completeActivity(article.id)
-                    markActivityCompleted(article.lessonId, article.id)
-                    setCompleted(true)
-                    showSnackbar(t('activity.progressSaved'))
-                  } catch {
-                    showSnackbar('Nie udało się zapisać postępu', 'error')
-                  }
-                }}
-              >
-                {t('activity.markComplete')}
-              </Button>
-            )}
-          </Box>
         </Paper>
       )}
+
+      <Paper sx={{ p: 4 }}>
+        <Box sx={{ mb: 3 }}>
+          {completed ? (
+            <Chip icon={<CheckCircleIcon />} label={t('activity.alreadyCompleted')} color="success" variant="outlined" />
+          ) : (
+            <Button
+              variant="outlined"
+              color="success"
+              startIcon={<CheckCircleIcon />}
+              onClick={handleComplete}
+            >
+              {t('activity.markComplete')}
+            </Button>
+          )}
+        </Box>
+
+        <ActivityNavBar
+          currentIndex={currentIndex}
+          totalCount={totalCount}
+          hasPrev={hasPrev}
+          hasNext={hasNext}
+          isLast={isLast}
+          onPrev={goPrev}
+          onNext={goNext}
+          onGoToLesson={goToLesson}
+          requireCompletion={false}
+          isCompleted={completed}
+        />
+      </Paper>
     </>
   )
 }

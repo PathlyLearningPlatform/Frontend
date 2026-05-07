@@ -54,7 +54,7 @@ const handleSubmit = async () => {
         const data = await updateArticle(activity.id, { name: name.trim(), description: description.trim() || undefined, ref: ref.trim() || undefined })
         result = { ...data.article, type: 'ARTICLE' }
       } else {
-        const data = await createArticle({ name: name.trim(), description: description.trim() || undefined, lessonId, ref: ref.trim() })
+        const data = await createArticle({ name: name.trim(), description: description.trim() || undefined, lessonId, ref: ref.trim(), order })  // ← order
         result = { ...data.article, type: 'ARTICLE' }
       }
     } else if (type === 'EXERCISE') {
@@ -62,7 +62,7 @@ const handleSubmit = async () => {
         const data = await updateExercise(activity.id, { name: name.trim(), description: description.trim() || undefined, difficulty })
         result = { ...data.exercise, type: 'EXERCISE' }
       } else {
-        const data = await createExercise({ name: name.trim(), description: description.trim() || undefined, lessonId, difficulty })
+        const data = await createExercise({ name: name.trim(), description: description.trim() || undefined, lessonId, difficulty, order })  // ← order
         result = { ...data.exercise, type: 'EXERCISE' }
       }
     } else {
@@ -70,7 +70,7 @@ const handleSubmit = async () => {
         const data = await updateQuiz(activity.id, { name: name.trim(), description: description.trim() || undefined })
         result = { ...data.quiz, type: 'QUIZ' }
       } else {
-        const data = await createQuiz({ name: name.trim(), description: description.trim() || undefined, lessonId })
+        const data = await createQuiz({ name: name.trim(), description: description.trim() || undefined, lessonId, order })  // ← order
         result = { ...data.quiz, type: 'QUIZ' }
       }
     }

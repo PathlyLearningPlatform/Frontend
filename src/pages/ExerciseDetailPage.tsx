@@ -16,6 +16,8 @@ import type { Activity, Lesson } from '../types/api'
 import { useLanguage } from '../context/LanguageContext'
 import { useSnackbar } from '../context/SnackbarContext'
 import { isActivityCompleted, markActivityCompleted } from '../lib/activityProgress'
+import { useActivityNavigation } from '../hooks/useActivityNavigation'  // ← NOWE
+import ActivityNavBar from '../components/ActivityNavBar'                // ← NOWE
 
 const difficultyConfig: Record<string, { label: string; color: string }> = {
   EASY: { label: 'Łatwy', color: '#4CAF50' },
@@ -31,6 +33,10 @@ export default function ExerciseDetailPage() {
   const navigate = useNavigate()
   const { t } = useLanguage()
   const { showSnackbar } = useSnackbar()
+
+  // ← NOWE
+  const { currentIndex, totalCount, hasPrev, hasNext, isLast, goNext, goPrev, goToLesson } =
+    useActivityNavigation(activityId)
 
   const [exercise, setExercise] = useState<Activity | null>(null)
   const [completed, setCompleted] = useState(false)
@@ -56,9 +62,7 @@ export default function ExerciseDetailPage() {
     }
   }, [activityId])
 
-  useEffect(() => {
-    fetchData()
-  }, [fetchData])
+  useEffect(() => { fetchData() }, [fetchData])
 
   if (loading) return <DetailSkeleton />
   if (!exercise) return <Alert severity="error">Nie znaleziono ćwiczenia.</Alert>
@@ -68,6 +72,18 @@ export default function ExerciseDetailPage() {
     : null
   const config = difficulty ? difficultyConfig[difficulty] : null
 
+  const handleComplete = async () => {
+    if (!exercise) return
+    try {
+      await completeActivity(exercise.id)
+      markActivityCompleted(exercise.lessonId, exercise.id)
+      setCompleted(true)
+      showSnackbar(t('activity.progressSaved'))
+    } catch {
+      showSnackbar('Nie udało się zapisać postępu', 'error')
+    }
+  }
+
   return (
     <>
       <Breadcrumbs sx={{ mb: 3 }}>
@@ -75,7 +91,7 @@ export default function ExerciseDetailPage() {
           Pulpit
         </Link>
         {parentLesson && (
-          <Link underline="hover" color="inherit" sx={{ cursor: 'pointer' }} onClick={() => navigate(`/lessons/${parentLesson.id}`)}>
+          <Link underline="hover" color="inherit" sx={{ cursor: 'pointer' }} onClick={goToLesson}>
             {parentLesson.name}
           </Link>
         )}
@@ -88,19 +104,10 @@ export default function ExerciseDetailPage() {
         </Alert>
       )}
 
-      <Paper
-        sx={{
-          p: 4,
-          mb: 4,
-          background: 'linear-gradient(135deg, #FF9800 0%, #FFB74D 100%)',
-          color: 'white',
-        }}
-      >
+      <Paper sx={{ p: 4, mb: 4, background: 'linear-gradient(135deg, #FF9800 0%, #FFB74D 100%)', color: 'white' }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
           <FitnessCenterIcon sx={{ fontSize: 32 }} />
-          <Typography variant="h4" sx={{ fontWeight: 700 }}>
-            {exercise.name}
-          </Typography>
+          <Typography variant="h4" sx={{ fontWeight: 700 }}>{exercise.name}</Typography>
           <Chip label="Ćwiczenie" sx={{ bgcolor: 'rgba(255,255,255,0.2)', color: 'white' }} />
         </Box>
         {exercise.description && (
@@ -110,47 +117,48 @@ export default function ExerciseDetailPage() {
         )}
       </Paper>
 
-      {config && (
-        <Paper sx={{ p: 4 }}>
-          <Typography variant="h6" sx={{ mb: 2 }}>Szczegóły</Typography>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Typography variant="body1">Poziom trudności:</Typography>
-            <Chip
-              label={config.label}
-              sx={{
-                bgcolor: `${config.color}15`,
-                color: config.color,
-                fontWeight: 600,
-                fontSize: '0.9rem',
-              }}
-            />
-          </Box>
-          <Box sx={{ mt: 3 }}>
-            {completed ? (
-              <Chip icon={<CheckCircleIcon />} label={t('activity.alreadyCompleted')} color="success" variant="outlined" />
-            ) : (
-              <Button
-                variant="outlined"
-                color="success"
-                startIcon={<CheckCircleIcon />}
-                onClick={async () => {
-                  if (!exercise) return
-                  try {
-                    await completeActivity(exercise.id)
-                    markActivityCompleted(exercise.lessonId, exercise.id)
-                    setCompleted(true)
-                    showSnackbar(t('activity.progressSaved'))
-                  } catch {
-                    showSnackbar('Nie udało się zapisać postępu', 'error')
-                  }
-                }}
-              >
-                {t('activity.markComplete')}
-              </Button>
-            )}
-          </Box>
-        </Paper>
-      )}
+      <Paper sx={{ p: 4 }}>
+        {config && (
+          <>
+            <Typography variant="h6" sx={{ mb: 2 }}>Szczegóły</Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Typography variant="body1">Poziom trudności:</Typography>
+              <Chip
+                label={config.label}
+                sx={{ bgcolor: `${config.color}15`, color: config.color, fontWeight: 600, fontSize: '0.9rem' }}
+              />
+            </Box>
+          </>
+        )}
+        <Box sx={{ mt: 3 }}>
+          {completed ? (
+            <Chip icon={<CheckCircleIcon />} label={t('activity.alreadyCompleted')} color="success" variant="outlined" />
+          ) : (
+            <Button
+              variant="outlined"
+              color="success"
+              startIcon={<CheckCircleIcon />}
+              onClick={handleComplete}
+            >
+              {t('activity.markComplete')}
+            </Button>
+          )}
+        </Box>
+
+        {/* ← NOWE */}
+        <ActivityNavBar
+          currentIndex={currentIndex}
+          totalCount={totalCount}
+          hasPrev={hasPrev}
+          hasNext={hasNext}
+          isLast={isLast}
+          onPrev={goPrev}
+          onNext={goNext}
+          onGoToLesson={goToLesson}
+          requireCompletion={false}
+          isCompleted={completed}
+        />
+      </Paper>
     </>
   )
 }
