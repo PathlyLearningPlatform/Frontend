@@ -15,6 +15,7 @@ import ExerciseDetailPage from './pages/ExerciseDetailPage'
 import NotFoundPage from './pages/NotFoundPage'
 import ProjectsPage from './pages/ProjectsPage'
 import SkillsPage from './pages/SkillsPage'
+import ExercisesPage from './pages/ExercisesPage'
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
           <Route path="/skills" element={<SkillsPage />} />
           <Route path="/projects" element={<ProjectsPage />} />
           <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/exercises" element={<ExercisesPage />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/learning-paths/:id" element={<LearningPathDetailPage />} />
           <Route path="/units/:unitId" element={<UnitDetailPage />} />

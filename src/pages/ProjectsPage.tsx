@@ -10,6 +10,7 @@ import GitHubIcon from '@mui/icons-material/GitHub'
 import FolderIcon from '@mui/icons-material/Folder'
 import OpenInNewIcon from '@mui/icons-material/OpenInNew'
 import { apiClient } from '../api'
+import { useLanguage } from '../context/LanguageContext'
 
 interface Project {
   id: string
@@ -20,6 +21,7 @@ interface Project {
 }
 
 export default function ProjectsPage() {
+  const { t } = useLanguage()
   const [projects, setProjects] = useState<Project[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -30,22 +32,18 @@ export default function ProjectsPage() {
         const res = await apiClient.get<{ projects: Project[] }>('/v1/projects')
         setProjects(res.projects)
       } catch {
-        setError('Nie udało się pobrać projektów.')
+        setError(t('projects.fetchError'))
       } finally {
         setLoading(false)
       }
     }
     fetch()
-  }, [])
+  }, [t])
 
   return (
     <>
-      <Typography variant="h4" gutterBottom>
-        Projekty
-      </Typography>
-      <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
-        Praktyczne projekty do wykonania
-      </Typography>
+      <Typography variant="h4" gutterBottom>{t('projects.title')}</Typography>
+      <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>{t('projects.subtitle')}</Typography>
 
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 
@@ -56,12 +54,8 @@ export default function ProjectsPage() {
       ) : projects.length === 0 ? (
         <Paper sx={{ p: 6, textAlign: 'center' }}>
           <FolderIcon sx={{ fontSize: 80, color: 'text.secondary', mb: 2, opacity: 0.5 }} />
-          <Typography variant="h6" color="text.secondary">
-            Brak projektów
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-            Administrator musi dodać projekty do systemu
-          </Typography>
+          <Typography variant="h6" color="text.secondary">{t('projects.empty')}</Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>{t('projects.emptyHint')}</Typography>
         </Paper>
       ) : (
         projects.map((project) => (
@@ -73,9 +67,7 @@ export default function ProjectsPage() {
               <Box sx={{ flex: 1 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                   <GitHubIcon sx={{ color: 'text.secondary' }} />
-                  <Typography variant="h6" fontWeight={600}>
-                    {project.name}
-                  </Typography>
+                  <Typography variant="h6" fontWeight={600}>{project.name}</Typography>
                   <Chip label="GitHub Classroom" size="small" variant="outlined" />
                 </Box>
                 {project.description && (
@@ -97,7 +89,7 @@ export default function ProjectsPage() {
                   flexShrink: 0,
                 }}
               >
-                Akceptuj projekt
+                {t('projects.accept')}
               </Button>
             </Box>
           </Paper>

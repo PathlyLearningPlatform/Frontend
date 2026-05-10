@@ -250,7 +250,7 @@ export default function LessonDetailPage() {
                     )}
                   </Box>
                   <Typography variant="button" color="primary" sx={{ fontWeight: 700, ml: 2 }}>
-                    Rozpocznij
+                    {t('activity.start')}
                   </Typography>
                 </Box>
               </Paper>

@@ -22,6 +22,7 @@ import DarkModeIcon from '@mui/icons-material/DarkMode'
 import LightModeIcon from '@mui/icons-material/LightMode'
 import LoginIcon from '@mui/icons-material/Login'
 import FolderIcon from '@mui/icons-material/Folder'
+import FitnessCenterIcon from '@mui/icons-material/FitnessCenter'
 import LogoutIcon from '@mui/icons-material/Logout'
 import AccountTreeIcon from '@mui/icons-material/AccountTree'
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
@@ -36,6 +37,7 @@ const mainMenuKeys = [
   { key: 'nav.dashboard' as const, icon: <HomeIcon />, path: '/' },
   { key: 'nav.explore' as const, icon: <RouteIcon />, path: '/explore' },
   { key: 'nav.skills' as const, icon: <AccountTreeIcon />, path: '/skills' },
+  { key: 'nav.exercises' as const, icon: <FitnessCenterIcon />, path: '/exercises' },
   { key: 'nav.projects' as const, icon: <FolderIcon />, path: '/projects' },
 ]
 

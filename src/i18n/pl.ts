@@ -5,6 +5,7 @@ const pl = {
   'nav.myPaths': 'Moje ścieżki',
   'nav.progress': 'Moje postępy',
   'nav.skills': 'Umiejętności',
+  'nav.exercises': 'Ćwiczenia',
   'nav.profile': 'Profil',
   'nav.projects': 'Projekty',
   'nav.settings': 'Ustawienia',
@@ -196,6 +197,73 @@ const pl = {
   'common.backToDashboard': 'Wróć na pulpit',
   'common.notFound': 'Nie znaleziono strony',
   'common.notFoundDesc': 'Strona, której szukasz, nie istnieje lub została przeniesiona.',
+
+    // Dashboard sekcje
+  'dashboard.myProgress': 'Mój postęp',
+  'dashboard.myPaths': 'Moje ścieżki',
+  'dashboard.startedPaths': 'Brak rozpoczętych ścieżek',
+
+  // Activities hardcoded
+  'activity.material': 'Materiał',
+  'activity.details': 'Szczegóły',
+  'activity.openMaterial': 'Otwórz materiał',
+  'activity.start': 'Rozpocznij',
+
+  // Nav
+  'nav.back': 'Wróć do lekcji',
+  'nav.previous': 'Poprzednia',
+  'nav.next': 'Następna',
+  'nav.finishLesson': 'Zakończ lekcję',
+  'nav.completeRequired': 'Ukończ tę aktywność, aby przejść dalej',
+
+  // Exercise
+  'exercise.title': 'Ćwiczenie',
+  'exercise.article': 'Artykuł',
+  'exercise.quiz': 'Quiz',
+
+  // Quiz tabs
+  'quiz.tabManageLabel': 'Pytania i edycja',
+  'quiz.completed': 'Ukończona',
+  'quiz.inProgress': 'W trakcie',
+  'quiz.sections': 'sekcji',
+
+  // Explore
+  'explore.title': 'Przeglądaj ścieżki',
+  'explore.subtitle': 'Znajdź ścieżkę nauki dopasowaną do Twoich potrzeb',
+  'explore.search': 'Czego chcesz się nauczyć?',
+  'explore.noPathsFound': 'Nie znaleziono ścieżek',
+  'explore.noPaths': 'Brak dostępnych ścieżek',
+  'explore.changeSearch': 'Spróbuj zmienić kryteria wyszukiwania',
+  'explore.comingSoon': 'Wkrótce pojawią się nowe ścieżki nauki',
+  'explore.deleteTitle': 'Usuń ścieżkę nauki',
+  'explore.deleteMessage': 'Czy na pewno chcesz usunąć tę ścieżkę?',
+  'explore.fetchError': 'Nie udało się pobrać ścieżek.',
+  'explore.deleteError': 'Nie udało się usunąć ścieżki.',
+
+  // Skills
+  'skills.title': 'Drzewo umiejętności',
+  'skills.subtitle': 'Odkryj i rozwijaj swoje umiejętności',
+  'skills.fetchError': 'Nie udało się pobrać drzewa umiejętności.',
+  'skills.empty': 'Brak umiejętności do wyświetlenia',
+  'skills.emptyHint': 'Administrator musi dodać umiejętności do systemu',
+  'skills.nextStep': 'Następny krok',
+  'skills.subskill': 'Podumiejętność',
+
+  // Exercises
+  'exercises.title': 'Ćwiczenia',
+  'exercises.subtitle': 'Wszystkie dostępne ćwiczenia praktyczne',
+  'exercises.fetchError': 'Nie udało się pobrać ćwiczeń.',
+  'exercises.empty': 'Brak ćwiczeń',
+  'exercises.emptyHint': 'Nie ma jeszcze żadnych ćwiczeń w systemie',
+  'exercises.completed': 'Ukończone',
+
+  // Projects
+  'projects.title': 'Projekty',
+  'projects.subtitle': 'Praktyczne projekty do wykonania',
+  'projects.fetchError': 'Nie udało się pobrać projektów.',
+  'projects.empty': 'Brak projektów',
+  'projects.emptyHint': 'Administrator musi dodać projekty do systemu',
+  'projects.accept': 'Akceptuj projekt',
 } as const
 
 export default pl

@@ -19,8 +19,8 @@ import type { Activity, Lesson, Question } from '../types/api'
 import { useSnackbar } from '../context/SnackbarContext'
 import { useLanguage } from '../context/LanguageContext'
 import { answersMatch, markActivityCompleted } from '../lib/activityProgress'
-import { useActivityNavigation } from '../hooks/useActivityNavigation'  // ← NOWE
-import ActivityNavBar from '../components/ActivityNavBar'                // ← NOWE
+import { useActivityNavigation } from '../hooks/useActivityNavigation' 
+import ActivityNavBar from '../components/ActivityNavBar'                
 
 export default function QuizDetailPage() {
   const { activityId } = useParams()
@@ -28,7 +28,6 @@ export default function QuizDetailPage() {
   const { showSnackbar } = useSnackbar()
   const { t } = useLanguage()
 
-  // ← NOWE
   const { currentIndex, totalCount, hasPrev, hasNext, isLast, goNext, goPrev, goToLesson } =
     useActivityNavigation(activityId)
 
@@ -37,13 +36,6 @@ export default function QuizDetailPage() {
   const [questions, setQuestions] = useState<Question[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-
-  const [deleteQuestionId, setDeleteQuestionId] = useState<string | null>(null)
-  const [dialogOpen, setDialogOpen] = useState(false)
-  const [editingQuestion, setEditingQuestion] = useState<Question | undefined>(undefined)
-  const [formContent, setFormContent] = useState('')
-  const [formAnswer, setFormAnswer] = useState('')
-  const [saving, setSaving] = useState(false)
 
   const [solveIndex, setSolveIndex] = useState(0)
   const [userAnswer, setUserAnswer] = useState('')
@@ -68,11 +60,11 @@ export default function QuizDetailPage() {
         setParentLesson(lessonData.lesson)
       } catch { /* fallback */ }
     } catch {
-      setError('Nie udało się pobrać danych quizu.')
+      setError(t('error.fetchQuiz' as any) || 'Nie udało się pobrać danych quizu.')
     } finally {
       setLoading(false)
     }
-  }, [activityId])
+  }, [activityId, t])
 
   useEffect(() => { fetchData() }, [fetchData])
 
@@ -86,48 +78,6 @@ export default function QuizDetailPage() {
   }
 
   useEffect(() => { resetSolveMode() }, [activityId])
-
-  const openDialog = (question?: Question) => {
-    setEditingQuestion(question)
-    setFormContent(question?.content ?? '')
-    setFormAnswer(question?.correctAnswer ?? '')
-    setDialogOpen(true)
-  }
-
-  const handleSave = async () => {
-    if (!activityId || !formContent.trim() || !formAnswer.trim()) return
-    setSaving(true)
-    try {
-      if (editingQuestion) {
-        const res = await updateQuestion(activityId, editingQuestion.id, { content: formContent, correctAnswer: formAnswer })
-        setQuestions((prev) => prev.map((q) => (q.id === res.question.id ? res.question : q)))
-        showSnackbar('Pytanie zaktualizowane')
-      } else {
-        const res = await createQuestion(activityId, { content: formContent, correctAnswer: formAnswer })
-        setQuestions((prev) => [...prev, res.question].sort((a, b) => a.order - b.order))
-        showSnackbar('Pytanie dodane')
-      }
-      setDialogOpen(false)
-    } catch {
-      setError('Nie udało się zapisać pytania.')
-    } finally {
-      setSaving(false)
-    }
-  }
-
-  const handleDelete = async () => {
-    if (!activityId || !deleteQuestionId) return
-    const removedId = deleteQuestionId
-    setQuestions((prev) => prev.filter((q) => q.id !== removedId))
-    setDeleteQuestionId(null)
-    try {
-      await deleteQuestion(activityId, removedId)
-      showSnackbar('Pytanie usunięte')
-    } catch {
-      setError('Nie udało się usunąć pytania.')
-      fetchData()
-    }
-  }
 
   const currentQuestion = questions[solveIndex]
   const solveProgress = questions.length > 0 ? ((solveIndex + (checked ? 1 : 0)) / questions.length) * 100 : 0
@@ -147,9 +97,9 @@ export default function QuizDetailPage() {
         try {
           await completeActivity(quiz.id)
           markActivityCompleted(quiz.lessonId, quiz.id)
-          showSnackbar(t('quiz.markedComplete'))
+          showSnackbar(t('quiz.markedComplete' as any) || 'Quiz ukończony!')
         } catch {
-          showSnackbar('Nie udało się zapisać postępu', 'error')
+          showSnackbar(t('error.saveProgress' as any) || 'Nie udało się zapisać postępu', 'error')
         }
       }
       return
@@ -161,13 +111,13 @@ export default function QuizDetailPage() {
   }
 
   if (loading) return <DetailSkeleton />
-  if (!quiz) return <Alert severity="error">Nie znaleziono quizu.</Alert>
+  if (!quiz) return <Alert severity="error">{t('error.notFound' as any) || 'Nie znaleziono quizu.'}</Alert>
 
   return (
     <>
       <Breadcrumbs sx={{ mb: 3 }}>
         <Link underline="hover" color="inherit" sx={{ cursor: 'pointer' }} onClick={() => navigate('/')}>
-          Pulpit
+          {t('nav.dashboard' as any)}
         </Link>
         {parentLesson && (
           <Link underline="hover" color="inherit" sx={{ cursor: 'pointer' }} onClick={goToLesson}>
@@ -187,175 +137,102 @@ export default function QuizDetailPage() {
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
           <QuizIcon sx={{ fontSize: 32 }} />
           <Typography variant="h4" sx={{ fontWeight: 700 }}>{quiz.name}</Typography>
-          <Chip label="Quiz" sx={{ bgcolor: 'rgba(255,255,255,0.2)', color: 'white' }} />
+          <Chip label={t('exercise.quiz' as any) || 'Quiz'} sx={{ bgcolor: 'rgba(255,255,255,0.2)', color: 'white' }} />
         </Box>
         {quiz.description && (
           <Typography variant="body1" sx={{ opacity: 0.9, maxWidth: 720 }}>{quiz.description}</Typography>
         )}
         <Chip
-          label={t('quiz.questionCount', { count: questions.length })}
+          label={t('quiz.questionCount' as any, { count: questions.length }) || `${questions.length} pytań`}
           sx={{ mt: 2, bgcolor: 'rgba(255,255,255,0.2)', color: 'white' }}
         />
       </Paper>
 
-     {/* <Tabs value={mainTab} onChange={(_, v) => setMainTab(v)} sx={{ mb: 3 }} variant="fullWidth">
-        <Tab label={t('quiz.tabSolve')} />
-        <Tab label={t('quiz.tabManage')} />
-      </Tabs>
-      */}
-
-      
-        <Box>
-          {questions.length === 0 ? (
-            <Paper sx={{ p: 4, textAlign: 'center' }}>
-              <Typography color="text.secondary">{t('quiz.noQuestionsSolve')}</Typography>
-            </Paper>
-          ) : solveFinished ? (
-            // ── Ekran podsumowania – tu pokazujemy ActivityNavBar ──
-            <Paper sx={{ p: 4, maxWidth: 640, mx: 'auto', textAlign: 'center' }}>
-              <CheckCircleIcon sx={{ fontSize: 64, color: 'success.main', mb: 2 }} />
-              <Typography variant="h5" gutterBottom>{t('quiz.summaryTitle')}</Typography>
-              <Typography variant="h4" sx={{ my: 2, fontWeight: 800, color: 'primary.main' }}>
-                {correctCount} / {questions.length}
-              </Typography>
-              <Typography color="text.secondary" sx={{ mb: 3 }}>{t('quiz.summaryHint')}</Typography>
-              <Button variant="outlined" size="large" onClick={resetSolveMode} sx={{ mr: 2 }}>
-                {t('quiz.restart')}
-              </Button>
-
-              {/* ← NOWE: nawigacja po ukończeniu quizu */}
-              <ActivityNavBar
-                currentIndex={currentIndex}
-                totalCount={totalCount}
-                hasPrev={hasPrev}
-                hasNext={hasNext}
-                isLast={isLast}
-                onPrev={goPrev}
-                onNext={goNext}
-                onGoToLesson={goToLesson}
-                requireCompletion={false}
-                isCompleted={true}
-              />
-            </Paper>
-          ) : (
-            <Paper elevation={3} sx={{ p: { xs: 3, sm: 5 }, maxWidth: 800, mx: 'auto', borderRadius: 3, border: '1px solid', borderColor: 'divider' }}>
-              <Box sx={{ mb: 3 }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                  <Typography variant="subtitle2" color="text.secondary" fontWeight={700}>
-                    {t('quiz.questionProgress', { current: solveIndex + 1, total: questions.length })}
-                  </Typography>
-                  <Chip
-                    size="small"
-                    label={`${Math.round(((solveIndex + (checked ? 1 : 0)) / questions.length) * 100)}%`}
-                    color="secondary"
-                    variant="outlined"
-                  />
-                </Box>
-                <LinearProgress variant="determinate" value={solveProgress} sx={{ height: 10, borderRadius: 1 }} />
-              </Box>
-
-              <Typography component="h2" variant="h5" sx={{ fontWeight: 700, mb: 3, lineHeight: 1.4, fontSize: { xs: '1.25rem', sm: '1.5rem' } }}>
-                {currentQuestion?.content}
-              </Typography>
-
-              <TextField
-                fullWidth
-                label={t('quiz.yourAnswer')}
-                value={userAnswer}
-                onChange={(e) => setUserAnswer(e.target.value)}
-                disabled={checked}
-                multiline
-                minRows={2}
-                sx={{ mb: 2 }}
-                placeholder={t('quiz.answerPlaceholder')}
-              />
-
-              {!checked ? (
-                <Button variant="contained" size="large" onClick={handleCheckAnswer} disabled={!userAnswer.trim()}>
-                  {t('quiz.check')}
-                </Button>
-              ) : (
-                <Box>
-                  <Alert severity={lastCorrect ? 'success' : 'error'} icon={lastCorrect ? <CheckCircleIcon /> : <CancelIcon />} sx={{ mb: 2 }}>
-                    <Typography fontWeight={700}>{lastCorrect ? t('quiz.correct') : t('quiz.incorrect')}</Typography>
-                    {!lastCorrect && (
-                      <Typography variant="body2" sx={{ mt: 1 }}>
-                        {t('quiz.expectedAnswer')}: <strong>{currentQuestion?.correctAnswer}</strong>
-                      </Typography>
-                    )}
-                  </Alert>
-                  <Button variant="contained" size="large" onClick={handleNextQuestion}>
-                    {solveIndex >= questions.length - 1 ? t('quiz.finish') : t('quiz.next')}
-                  </Button>
-                </Box>
-              )}
-            </Paper>
-          )}
-        </Box>
-      {/*
-
-      {mainTab === 1 && (
-        <>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-            <Typography variant="h5">{t('quiz.questionsHeading')}</Typography>
-            <Button variant="contained" size="small" startIcon={<AddIcon />} onClick={() => openDialog()}>
-              {t('quiz.addQuestion')}
+      <Box>
+        {questions.length === 0 ? (
+          <Paper sx={{ p: 4, textAlign: 'center' }}>
+            <Typography color="text.secondary">{t('quiz.noQuestionsSolve' as any) || 'Brak pytań.'}</Typography>
+          </Paper>
+        ) : solveFinished ? (
+          <Paper sx={{ p: 4, maxWidth: 640, mx: 'auto', textAlign: 'center' }}>
+            <CheckCircleIcon sx={{ fontSize: 64, color: 'success.main', mb: 2 }} />
+            <Typography variant="h5" gutterBottom>{t('quiz.summaryTitle' as any) || 'Koniec quizu!'}</Typography>
+            <Typography variant="h4" sx={{ my: 2, fontWeight: 800, color: 'primary.main' }}>
+              {correctCount} / {questions.length}
+            </Typography>
+            <Typography color="text.secondary" sx={{ mb: 3 }}>{t('quiz.summaryHint' as any) || 'Dobra robota!'}</Typography>
+            <Button variant="outlined" size="large" onClick={resetSolveMode} sx={{ mr: 2 }}>
+              {t('quiz.restart' as any) || 'Spróbuj ponownie'}
             </Button>
-          </Box>
 
-          {questions.length === 0 ? (
-            <Paper sx={{ p: 6, textAlign: 'center' }}>
-              <QuizIcon sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
-              <Typography variant="h6" color="text.secondary" gutterBottom>{t('quiz.noQuestions')}</Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>{t('quiz.addFirstQuestion')}</Typography>
-              <Button variant="outlined" startIcon={<AddIcon />} onClick={() => openDialog()}>{t('quiz.addQuestion')}</Button>
-            </Paper>
-          ) : (
-            questions.map((question, index) => (
-              <Paper key={question.id} sx={{ mb: 2, overflow: 'hidden' }}>
-                <Box sx={{ p: 2.5, display: 'flex', alignItems: 'flex-start' }}>
-                  <Box sx={{ width: 40, height: 40, borderRadius: '50%', bgcolor: '#9C27B0', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, fontWeight: 700, mr: 2, flexShrink: 0, mt: 0.5 }}>
-                    {index + 1}
-                  </Box>
-                  <Box sx={{ flex: 1 }}>
-                    <Typography variant="h6" sx={{ fontWeight: 600, mb: 1.5, fontSize: '1.05rem' }}>{question.content}</Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
-                      <CheckCircleIcon sx={{ fontSize: 20, color: 'success.main' }} />
-                      <Typography variant="body1" color="success.main" sx={{ fontWeight: 600 }}>{question.correctAnswer}</Typography>
-                    </Box>
-                  </Box>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                    <IconButton size="small" onClick={() => openDialog(question)}><EditIcon fontSize="small" /></IconButton>
-                    <IconButton size="small" color="error" onClick={() => setDeleteQuestionId(question.id)}><DeleteIcon fontSize="small" /></IconButton>
-                  </Box>
-                </Box>
-              </Paper>
-            ))
-          )}
-        </>
-      )}
+            <ActivityNavBar
+              currentIndex={currentIndex}
+              totalCount={totalCount}
+              hasPrev={hasPrev}
+              hasNext={hasNext}
+              isLast={isLast}
+              onPrev={goPrev}
+              onNext={goNext}
+              onGoToLesson={goToLesson}
+              requireCompletion={false}
+              isCompleted={true}
+            />
+          </Paper>
+        ) : (
+          <Paper elevation={3} sx={{ p: { xs: 3, sm: 5 }, maxWidth: 800, mx: 'auto', borderRadius: 3, border: '1px solid', borderColor: 'divider' }}>
+            <Box sx={{ mb: 3 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                <Typography variant="subtitle2" color="text.secondary" fontWeight={700}>
+                  {t('quiz.questionProgress' as any, { current: solveIndex + 1, total: questions.length }) || `Pytanie ${solveIndex + 1} z ${questions.length}`}
+                </Typography>
+                <Chip
+                  size="small"
+                  label={`${Math.round(((solveIndex + (checked ? 1 : 0)) / questions.length) * 100)}%`}
+                  color="secondary"
+                  variant="outlined"
+                />
+              </Box>
+              <LinearProgress variant="determinate" value={solveProgress} sx={{ height: 10, borderRadius: 1 }} />
+            </Box>
 
-      <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>{editingQuestion ? t('quiz.editQuestion') : t('quiz.newQuestion')}</DialogTitle>
-        <DialogContent>
-          <TextField autoFocus fullWidth label={t('quiz.questionContent')} value={formContent} onChange={(e) => setFormContent(e.target.value)} margin="normal" multiline rows={4} />
-          <TextField fullWidth label={t('quiz.correctAnswerLabel')} value={formAnswer} onChange={(e) => setFormAnswer(e.target.value)} margin="normal" />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setDialogOpen(false)}>{t('quiz.cancel')}</Button>
-          <Button variant="contained" onClick={handleSave} disabled={saving || !formContent.trim() || !formAnswer.trim()}>
-            {saving ? t('quiz.saving') : t('quiz.save')}
-          </Button>
-        </DialogActions>
-      </Dialog>
+            <Typography component="h2" variant="h5" sx={{ fontWeight: 700, mb: 3, lineHeight: 1.4, fontSize: { xs: '1.25rem', sm: '1.5rem' } }}>
+              {currentQuestion?.content}
+            </Typography>
 
-      <ConfirmDialog
-        open={deleteQuestionId !== null}
-        title={t('quiz.deleteTitle')}
-        message={t('quiz.deleteMessage')}
-        onConfirm={handleDelete}
-        onCancel={() => setDeleteQuestionId(null)}
-      />*/}
+            <TextField
+              fullWidth
+              label={t('quiz.yourAnswer' as any) || 'Twoja odpowiedź'}
+              value={userAnswer}
+              onChange={(e) => setUserAnswer(e.target.value)}
+              disabled={checked}
+              multiline
+              minRows={2}
+              sx={{ mb: 2 }}
+              placeholder={t('quiz.answerPlaceholder' as any) || 'Wpisz odpowiedź...'}
+            />
+
+            {!checked ? (
+              <Button variant="contained" size="large" onClick={handleCheckAnswer} disabled={!userAnswer.trim()}>
+                {t('quiz.check' as any) || 'Sprawdź'}
+              </Button>
+            ) : (
+              <Box>
+                <Alert severity={lastCorrect ? 'success' : 'error'} icon={lastCorrect ? <CheckCircleIcon /> : <CancelIcon />} sx={{ mb: 2 }}>
+                  <Typography fontWeight={700}>{lastCorrect ? t('quiz.correct' as any) : t('quiz.incorrect' as any)}</Typography>
+                  {!lastCorrect && (
+                    <Typography variant="body2" sx={{ mt: 1 }}>
+                      {t('quiz.expectedAnswer' as any) || 'Poprawna odpowiedź'}: <strong>{currentQuestion?.correctAnswer}</strong>
+                    </Typography>
+                  )}
+                </Alert>
+                <Button variant="contained" size="large" onClick={handleNextQuestion}>
+                  {solveIndex >= questions.length - 1 ? (t('quiz.finish' as any) || 'Zakończ') : (t('quiz.next' as any) || 'Dalej')}
+                </Button>
+              </Box>
+            )}
+          </Paper>
+        )}
+      </Box>
     </>
   )
 }

@@ -9,13 +9,14 @@ import Alert from '@mui/material/Alert'
 import Paper from '@mui/material/Paper'
 import SearchIcon from '@mui/icons-material/Search'
 import AutoStoriesIcon from '@mui/icons-material/AutoStories'
-import { getLearningPaths } from '../api'
+import { getLearningPaths, deleteLearningPath } from '../api'
 import type { LearningPath } from '../types/api'
 import LearningPathCard from '../components/LearningPathCard'
 import ConfirmDialog from '../components/ConfirmDialog'
-import { deleteLearningPath } from '../api'
+import { useLanguage } from '../context/LanguageContext'
 
 export default function ExplorePage() {
+  const { t } = useLanguage()
   const [paths, setPaths] = useState<LearningPath[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -29,15 +30,13 @@ export default function ExplorePage() {
       const data = await getLearningPaths()
       setPaths(data.paths)
     } catch {
-      setError('Nie udało się pobrać ścieżek.')
+      setError(t('explore.fetchError'))
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [t])
 
-  useEffect(() => {
-    fetchPaths()
-  }, [fetchPaths])
+  useEffect(() => { fetchPaths() }, [fetchPaths])
 
   const handleDelete = async () => {
     if (!deleteId) return
@@ -46,7 +45,7 @@ export default function ExplorePage() {
       setDeleteId(null)
       fetchPaths()
     } catch {
-      setError('Nie udało się usunąć ścieżki.')
+      setError(t('explore.deleteError'))
       setDeleteId(null)
     }
   }
@@ -58,16 +57,14 @@ export default function ExplorePage() {
 
   return (
     <>
-      <Typography variant="h4" gutterBottom>
-        Przeglądaj ścieżki
-      </Typography>
+      <Typography variant="h4" gutterBottom>{t('explore.title')}</Typography>
       <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-        Znajdź ścieżkę nauki dopasowaną do Twoich potrzeb
+        {t('explore.subtitle')}
       </Typography>
 
       <TextField
         fullWidth
-        placeholder="Czego chcesz się nauczyć?"
+        placeholder={t('explore.search')}
         value={search}
         onChange={(e) => setSearch(e.target.value)}
         slotProps={{
@@ -81,19 +78,11 @@ export default function ExplorePage() {
         }}
         sx={{
           mb: 4,
-          '& .MuiOutlinedInput-root': {
-            bgcolor: 'background.paper',
-            borderRadius: 3,
-            fontSize: '1.1rem',
-          },
+          '& .MuiOutlinedInput-root': { bgcolor: 'background.paper', borderRadius: 3, fontSize: '1.1rem' },
         }}
       />
 
-      {error && (
-        <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
-          {error}
-        </Alert>
-      )}
+      {error && <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>{error}</Alert>}
 
       {loading ? (
         <Box sx={{ display: 'flex', justifyContent: 'center', mt: 6 }}>
@@ -103,10 +92,10 @@ export default function ExplorePage() {
         <Paper sx={{ p: 6, textAlign: 'center' }}>
           <AutoStoriesIcon sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
           <Typography variant="h6" color="text.secondary" gutterBottom>
-            {search ? 'Nie znaleziono ścieżek' : 'Brak dostępnych ścieżek'}
+            {search ? t('explore.noPathsFound') : t('explore.noPaths')}
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            {search ? 'Spróbuj zmienić kryteria wyszukiwania' : 'Wkrótce pojawią się nowe ścieżki nauki'}
+            {search ? t('explore.changeSearch') : t('explore.comingSoon')}
           </Typography>
         </Paper>
       ) : (
@@ -121,8 +110,8 @@ export default function ExplorePage() {
 
       <ConfirmDialog
         open={deleteId !== null}
-        title="Usuń ścieżkę nauki"
-        message="Czy na pewno chcesz usunąć tę ścieżkę?"
+        title={t('explore.deleteTitle')}
+        message={t('explore.deleteMessage')}
         onConfirm={handleDelete}
         onCancel={() => setDeleteId(null)}
       />

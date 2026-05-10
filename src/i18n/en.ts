@@ -4,6 +4,7 @@ const en: Record<string, string> = {
   'nav.explore': 'Explore paths',
   'nav.myPaths': 'My paths',
   'nav.progress': 'My progress',
+  'nav.exercises': 'Exercises',
   'nav.profile': 'Profile',
   'nav.settings': 'Settings',
   'nav.projects': 'Projects',
@@ -198,6 +199,72 @@ const en: Record<string, string> = {
   'common.backToDashboard': 'Back to dashboard',
   'common.notFound': 'Page not found',
   'common.notFoundDesc': 'The page you are looking for does not exist or has been moved.',
+
+  // Dashboard sections
+  'dashboard.myProgress': 'My progress',
+  'dashboard.myPaths': 'My paths',
+  'dashboard.startedPaths': 'No started paths yet',
+
+  // Activities hardcoded
+  'activity.material': 'Material',
+  'activity.details': 'Details',
+  'activity.openMaterial': 'Open material',
+  'activity.start': 'Start',
+
+  // Nav
+  'nav.back': 'Back to lesson',
+  'nav.previous': 'Previous',
+  'nav.next': 'Next',
+  'nav.finishLesson': 'Finish lesson',
+  'nav.completeRequired': 'Complete this activity to continue',
+
+  // Exercise
+  'exercise.title': 'Exercise',
+  'exercise.article': 'Article',
+  'exercise.quiz': 'Quiz',
+
+  // Quiz
+  'quiz.completed': 'Completed',
+  'quiz.inProgress': 'In progress',
+  'quiz.sections': 'sections',
+
+  // Explore
+  'explore.title': 'Explore paths',
+  'explore.subtitle': 'Find a learning path that suits your needs',
+  'explore.search': 'What do you want to learn?',
+  'explore.noPathsFound': 'No paths found',
+  'explore.noPaths': 'No available paths',
+  'explore.changeSearch': 'Try changing your search criteria',
+  'explore.comingSoon': 'New learning paths coming soon',
+  'explore.deleteTitle': 'Delete learning path',
+  'explore.deleteMessage': 'Are you sure you want to delete this path?',
+  'explore.fetchError': 'Failed to fetch paths.',
+  'explore.deleteError': 'Failed to delete path.',
+
+  // Skills
+  'skills.title': 'Skills tree',
+  'skills.subtitle': 'Discover and develop your skills',
+  'skills.fetchError': 'Failed to fetch skills tree.',
+  'skills.empty': 'No skills to display',
+  'skills.emptyHint': 'An administrator must add skills to the system',
+  'skills.nextStep': 'Next step',
+  'skills.subskill': 'Sub-skill',
+
+  // Exercises
+  'exercises.title': 'Exercises',
+  'exercises.subtitle': 'All available practical exercises',
+  'exercises.fetchError': 'Failed to fetch exercises.',
+  'exercises.empty': 'No exercises',
+  'exercises.emptyHint': 'No exercises in the system yet',
+  'exercises.completed': 'Completed',
+
+  // Projects
+  'projects.title': 'Projects',
+  'projects.subtitle': 'Practical projects to complete',
+  'projects.fetchError': 'Failed to fetch projects.',
+  'projects.empty': 'No projects',
+  'projects.emptyHint': 'An administrator must add projects to the system',
+  'projects.accept': 'Accept project',
 }
 
 export default en

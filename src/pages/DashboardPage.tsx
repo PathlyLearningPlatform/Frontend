@@ -103,9 +103,12 @@ export default function DashboardPage() {
     },
   ]
 
+  const startedPathIds = new Set(pathsProgress.map(p => p.learningPathId))
+
   const filteredPaths = paths.filter(p =>
-    p.name.toLowerCase().includes(search.toLowerCase()) ||
-    p.description?.toLowerCase().includes(search.toLowerCase())
+    startedPathIds.has(p.id) &&
+    (p.name.toLowerCase().includes(search.toLowerCase()) ||
+    p.description?.toLowerCase().includes(search.toLowerCase()))
   )
 
   return (
@@ -172,7 +175,7 @@ export default function DashboardPage() {
       {/* My progress section */}
       {pathsProgress.length > 0 && (
         <MotionBox variants={itemVariants} sx={{ mb: 4 }}>
-          <Typography variant="h5" sx={{ fontWeight: 700, mb: 2 }}>Mój postęp</Typography>
+          <Typography variant="h5" sx={{ fontWeight: 700, mb: 2 }}>{t('dashboard.myProgress')}</Typography>
           {pathsProgress.map(progress => {
             const path = pathsMap[progress.learningPathId]
             const pct = progress.totalSectionCount > 0
@@ -245,7 +248,7 @@ export default function DashboardPage() {
       </MotionBox>
 
       <MotionBox variants={itemVariants} sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2.5 }}>
-        <Typography variant="h5" sx={{ fontWeight: 700 }}>{t('dashboard.allPaths')}</Typography>
+        <Typography variant="h5" sx={{ fontWeight: 700 }}>{t('dashboard.myPaths')}</Typography>
         <Chip label={filteredPaths.length} size="small" sx={{
           fontWeight: 700,
           background: 'linear-gradient(135deg, #6C63FF, #9590FF)',

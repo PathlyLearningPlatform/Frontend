@@ -16,16 +16,16 @@ import type { Activity, Lesson } from '../types/api'
 import { useLanguage } from '../context/LanguageContext'
 import { useSnackbar } from '../context/SnackbarContext'
 import { isActivityCompleted, markActivityCompleted } from '../lib/activityProgress'
-import { useActivityNavigation } from '../hooks/useActivityNavigation'  // ← NOWE
-import ActivityNavBar from '../components/ActivityNavBar'                // ← NOWE
+import { useActivityNavigation } from '../hooks/useActivityNavigation' 
+import ActivityNavBar from '../components/ActivityNavBar'                
 
-const difficultyConfig: Record<string, { label: string; color: string }> = {
-  EASY: { label: 'Łatwy', color: '#4CAF50' },
-  MEDIUM: { label: 'Średni', color: '#FF9800' },
-  HARD: { label: 'Trudny', color: '#F44336' },
-  easy: { label: 'Łatwy', color: '#4CAF50' },
-  medium: { label: 'Średni', color: '#FF9800' },
-  hard: { label: 'Trudny', color: '#F44336' },
+const difficultyConfig: Record<string, { labelKey: string; color: string }> = {
+  EASY: { labelKey: 'difficulty.easy', color: '#4CAF50' },
+  MEDIUM: { labelKey: 'difficulty.medium', color: '#FF9800' },
+  HARD: { labelKey: 'difficulty.hard', color: '#F44336' },
+  easy: { labelKey: 'difficulty.easy', color: '#4CAF50' },
+  medium: { labelKey: 'difficulty.medium', color: '#FF9800' },
+  hard: { labelKey: 'difficulty.hard', color: '#F44336' },
 }
 
 export default function ExerciseDetailPage() {
@@ -34,7 +34,6 @@ export default function ExerciseDetailPage() {
   const { t } = useLanguage()
   const { showSnackbar } = useSnackbar()
 
-  // ← NOWE
   const { currentIndex, totalCount, hasPrev, hasNext, isLast, goNext, goPrev, goToLesson } =
     useActivityNavigation(activityId)
 
@@ -56,16 +55,16 @@ export default function ExerciseDetailPage() {
         setParentLesson(lessonData.lesson)
       } catch { /* fallback */ }
     } catch {
-      setError('Nie udało się pobrać danych ćwiczenia.')
+      setError(t('error.fetchExercise' as any) || 'Nie udało się pobrać danych ćwiczenia.')
     } finally {
       setLoading(false)
     }
-  }, [activityId])
+  }, [activityId, t])
 
   useEffect(() => { fetchData() }, [fetchData])
 
   if (loading) return <DetailSkeleton />
-  if (!exercise) return <Alert severity="error">Nie znaleziono ćwiczenia.</Alert>
+  if (!exercise) return <Alert severity="error">{t('error.notFound' as any) || 'Nie znaleziono.'}</Alert>
 
   const difficulty = 'difficulty' in exercise
     ? (exercise as unknown as { difficulty: 'EASY' | 'MEDIUM' | 'HARD' }).difficulty
@@ -80,7 +79,7 @@ export default function ExerciseDetailPage() {
       setCompleted(true)
       showSnackbar(t('activity.progressSaved'))
     } catch {
-      showSnackbar('Nie udało się zapisać postępu', 'error')
+      showSnackbar(t('error.saveProgress' as any) || 'Nie udało się zapisać postępu', 'error')
     }
   }
 
@@ -88,7 +87,7 @@ export default function ExerciseDetailPage() {
     <>
       <Breadcrumbs sx={{ mb: 3 }}>
         <Link underline="hover" color="inherit" sx={{ cursor: 'pointer' }} onClick={() => navigate('/')}>
-          Pulpit
+          {t('nav.dashboard' as any)}
         </Link>
         {parentLesson && (
           <Link underline="hover" color="inherit" sx={{ cursor: 'pointer' }} onClick={goToLesson}>
@@ -108,7 +107,10 @@ export default function ExerciseDetailPage() {
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
           <FitnessCenterIcon sx={{ fontSize: 32 }} />
           <Typography variant="h4" sx={{ fontWeight: 700 }}>{exercise.name}</Typography>
-          <Chip label="Ćwiczenie" sx={{ bgcolor: 'rgba(255,255,255,0.2)', color: 'white' }} />
+          <Chip 
+            label={t('exercise.title' as any) || 'Ćwiczenie'} 
+            sx={{ bgcolor: 'rgba(255,255,255,0.2)', color: 'white' }} 
+          />
         </Box>
         {exercise.description && (
           <Typography variant="body1" sx={{ opacity: 0.9, maxWidth: 600 }}>
@@ -120,11 +122,11 @@ export default function ExerciseDetailPage() {
       <Paper sx={{ p: 4 }}>
         {config && (
           <>
-            <Typography variant="h6" sx={{ mb: 2 }}>Szczegóły</Typography>
+            <Typography variant="h6" sx={{ mb: 2 }}>{t('activity.details' as any) || 'Szczegóły'}</Typography>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              <Typography variant="body1">Poziom trudności:</Typography>
+              <Typography variant="body1">{t('activity.difficulty' as any) || 'Poziom trudności'}:</Typography>
               <Chip
-                label={config.label}
+                label={t(config.labelKey as any) || config.labelKey}
                 sx={{ bgcolor: `${config.color}15`, color: config.color, fontWeight: 600, fontSize: '0.9rem' }}
               />
             </Box>
@@ -145,7 +147,6 @@ export default function ExerciseDetailPage() {
           )}
         </Box>
 
-        {/* ← NOWE */}
         <ActivityNavBar
           currentIndex={currentIndex}
           totalCount={totalCount}

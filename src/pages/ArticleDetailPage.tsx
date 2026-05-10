@@ -47,16 +47,16 @@ export default function ArticleDetailPage() {
         setParentLesson(lessonData.lesson)
       } catch { /* fallback */ }
     } catch {
-      setError('Nie udało się pobrać danych artykułu.')
+      setError(t('error.fetchArticle' as any) || 'Nie udało się pobrać danych artykułu.')
     } finally {
       setLoading(false)
     }
-  }, [activityId])
+  }, [activityId, t])
 
   useEffect(() => { fetchData() }, [fetchData])
 
   if (loading) return <DetailSkeleton />
-  if (!article) return <Alert severity="error">Nie znaleziono artykułu.</Alert>
+  if (!article) return <Alert severity="error">{t('error.notFound' as any) || 'Nie znaleziono.'}</Alert>
 
   const ref = 'ref' in article ? (article as unknown as { ref: string }).ref : null
 
@@ -68,7 +68,7 @@ export default function ArticleDetailPage() {
       setCompleted(true)
       showSnackbar(t('activity.progressSaved'))
     } catch {
-      showSnackbar('Nie udało się zapisać postępu', 'error')
+      showSnackbar(t('error.saveProgress' as any) || 'Nie udało się zapisać postępu', 'error')
     }
   }
 
@@ -76,7 +76,7 @@ export default function ArticleDetailPage() {
     <>
       <Breadcrumbs sx={{ mb: 3 }}>
         <Link underline="hover" color="inherit" sx={{ cursor: 'pointer' }} onClick={() => navigate('/')}>
-          Pulpit
+          {t('nav.dashboard' as any)}
         </Link>
         {parentLesson && (
           <Link underline="hover" color="inherit" sx={{ cursor: 'pointer' }} onClick={goToLesson}>
@@ -96,7 +96,10 @@ export default function ArticleDetailPage() {
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
           <ArticleIcon sx={{ fontSize: 32 }} />
           <Typography variant="h4" sx={{ fontWeight: 700 }}>{article.name}</Typography>
-          <Chip label="Artykuł" sx={{ bgcolor: 'rgba(255,255,255,0.2)', color: 'white' }} />
+          <Chip 
+            label={t('exercise.article' as any) || 'Artykuł'} 
+            sx={{ bgcolor: 'rgba(255,255,255,0.2)', color: 'white' }} 
+          />
         </Box>
         {article.description && (
           <Typography variant="body1" sx={{ opacity: 0.9, maxWidth: 600 }}>
@@ -107,7 +110,7 @@ export default function ArticleDetailPage() {
 
       {ref && (
         <Paper sx={{ p: 4, mb: 2 }}>
-          <Typography variant="h6" sx={{ mb: 2 }}>Materiał</Typography>
+          <Typography variant="h6" sx={{ mb: 2 }}>{t('activity.material' as any) || 'Materiał'}</Typography>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <OpenInNewIcon color="primary" />
             <Link href={ref} target="_blank" rel="noopener noreferrer" underline="hover" sx={{ fontSize: '1.1rem' }}>
@@ -122,7 +125,7 @@ export default function ArticleDetailPage() {
             target="_blank"
             rel="noopener noreferrer"
           >
-            Otwórz materiał
+            {t('activity.openMaterial' as any) || 'Otwórz materiał'}
           </Button>
         </Paper>
       )}
